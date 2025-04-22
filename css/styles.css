@@ -1,0 +1,49 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+
+    /* Set the background image */
+    background-image: url('../img/nightSkyDark.jpg');
+    background-size: cover; /* Make the background image cover the entire page */
+    background-position: center; /* Center the background image */
+    background-attachment: fixed; /* Fix the background during scroll */
+}
+
+#game-container {
+    position: absolute;
+    align-content: center;
+    width: 66%;
+    height: 62%;
+    top: 18%;
+    left: 17%;
+    margin: 0px;
+    padding: 2px;
+    border-radius: 10px;
+    opacity: 0.875;
+    display: none;
+    background-color: black;
+    border: 1px solid gray;
+}
+
+.close-btn {
+    position: absolute;
+    top: -2%;
+    right: -1%;
+    border: none;
+    cursor: pointer;
+    z-index: 2;
+    padding: 0;
+    background: #ff4d4d;
+    color: white;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+}
+
+.close-btn img {
+  width: 20px;
+  height: 20px;
+}
+

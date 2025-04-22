@@ -1,0 +1,37 @@
+<style>
+    .settings-container {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        display: flex;
+        flex-direction: column; /* Stack vertically */
+        gap: 15px;
+        z-index: 10;
+    }
+
+    .icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 50%;
+        padding: 10px;
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.2s;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.8rem;
+        object-fit: contain; /* for image icons */
+    }
+</style>
+
+<div id="settingsContainer" class="settings-container">
+    <!-- Settings Icon -->
+    <img src="img/settingsIconGrey.png" alt="Settings" class="icon" id="settingsIcon" title="Settings">
+
+    <!-- Info Icon -->
+    <img src="img/infoIcon512.png" alt="Info" class="icon" id="infoIcon" title="Info">
+</div>
