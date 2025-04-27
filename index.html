@@ -51,7 +51,17 @@
             const markerCount = 0;
             const sphereWidthHeightSegments = 64;
             const sphereRadius = 4;
-            var spehereRotationSpeed = 1;
+            const kickoffSpherePullSpeed = 20;
+            let constantSphereRotationSpeed = 1;
+            var sphereRotationSpeed = constantSphereRotationSpeed;
+            
+            // Swipe on sphere
+            let isSwiping = false;
+            let slowingDown = false;
+            let swipeStartX = 0;          // Swipe start
+            let swipeEndX = 0;            // Swipe end
+            let swipeThreshold = 1;      // Minimum swipe distance to trigger
+            let swipeDistance = 0;
             
             const maxSceneZoomCloser = 12;
             const maxSceneZoomFar = 25;
@@ -91,8 +101,17 @@
                 //renderer.outputColorSpace=THREE.LinearSRGBColorSpace;
 
                 document.body.appendChild(renderer.domElement);
-                document.addEventListener('click', onMouse, false);
                 window.addEventListener("resize",onWindowResize);
+                document.addEventListener('mousedown', onSwipeStart, false);
+                document.addEventListener('mousemove', onSwipeMove, false);
+                document.addEventListener('mouseup', onSwipeEnd, false);
+
+                document.addEventListener('click', onMouse, false);
+
+                // Touch screen events
+                //document.addEventListener('touchstart', onSwipeStart, false);
+                //document.addEventListener('touchmove', onSwipeMove, false);
+                //document.addEventListener('touchend', onSwipeEnd, false);
 
                 // Set maximum zooming levels
                 controls = new OrbitControls(camera,renderer.domElement);
@@ -194,68 +213,6 @@
                 // Example: Add a marker at New York City (lat: 40.7128, lon: -74.0060)
                 addMarker(40.7128, -74.0060, "New York", sphereRadius, 0); // New York
                 addMarker(28.617177625664986, 77.20245884547343, "New Delhi", sphereRadius, 1); // New Delhi
-                
-                for (let i=0;i<markerCount;i++){
-                    var mat;
-                    var model;
-                    var mixer = null;
-                    var geo;
-                    const loader = new GLTFLoader();
-                    loader.load('img/mapPin.glb',
-                                    function (gltf) 
-                                    {   
-                                        model = gltf.scene;
-                                        gltf.scene.traverse( function( object ) 
-                                             {            
-                                               if ((object instanceof THREE.Mesh))
-                                                { 
-                                                    mat = object.material;
-                                                    geo = object.geometry;
-                                                    // Scale pin size and angle
-                                                    geo.scale(0.1, 0.1, 0.1);
-                                                    geo.rotateY(Math.PI / 2);
-                                                    geo.rotateX(Math.PI / 2.25);
-                                                    
-                                                    mat.map = object.texture;
-                                                    dummy[i] = new THREE.Mesh(geo, mat );
-                                                    dummy[i].position.randomDirection().setLength(sphereRadius);
-                                                    object.position.copy(position);
-                                                    dummy[i].updateMatrix();
-                                                    markers.setMatrixAt(i, dummy[i].matrix);
-                                                    dummy[i].name="Id: "+i;
-                                                    dummy[i].kx=position.clone().x;
-                                                    dummy[i].ky=position.y;
-                                                    dummy[i].kz=position.z;
-                                                    alvos.push(dummy[i]);
-                                                    globe.add(dummy[i]);
-                                                }
-                                            });
-                                    },
-                                    (xhr) => 
-                                    {
-                                        console.log((xhr.loaded / xhr.total * 100) + '% loaded')
-                                    },
-                                    (error) => 
-                                    {
-                                        console.log(error);
-                                    }
-                                );
-                    
-                    //const pinGeometry = new THREE.BoxGeometry( 0.2, 0.5, 0.2 );
-                    //const loader = new THREE.TextureLoader();
-                    //const pinMaterial = new THREE.MeshBasicMaterial({map: loader.load("img/mapPin.glb")});
-                    //dummy[i] = new THREE.Mesh(pinGeometry, pinMaterial );
-                    //dummy[i]=new THREE.Mesh(new THREE.SphereGeometry(0.1,
-                      //                                               sphereGeometryRadius,
-                        //                                             sphereGeometryRadius),
-                          //                                          new THREE.MeshLambertMaterial({color: 0xf83f20}));
-                    //dummy[i].name="Id: "+i;
-                    //dummy[i].kx=dummy[i].position.clone().x;
-                    //dummy[i].ky=dummy[i].position.y;
-                    //dummy[i].kz=dummy[i].position.z;
-                    //alvos.push(dummy[i]);
-                    //group.add(dummy[i]);
-                }
             }
 
             function onMouse(event){
@@ -277,11 +234,6 @@
                     
                     //console.log("intersect size is: ", isects.length );
                     isected=isects[0].object;//dspanC.innerText=isected.name;
-                    if(false){
-                        activityScreen.style.display="";
-                        activityScreen.animate([{backgroundColor:'#fcc'},{backgroundColor:'#909'}],{duration: 250});
-                        activityScreen.innerHTML="<table><tr><td colspan='2'>" + isected.name + "&nbsp;&nbsp;Mag: " + THREE.MathUtils.randInt(1, 10) + "</td></tr><tr><td style='text-align:left;'>X:</td><td style='text-align:right;'>" + Number(isected.kx).toFixed(2) + "</td></tr><tr><td style='text-align:left;'>Y:</td><td style='text-align:right;'>" + Number(isected.ky).toFixed(2) + "</td></tr><tr><td style='text-align:left;'>Z:</td><td style='text-align:right;'>" + Number(isected.kz).toFixed(2) + "</td></tr></table>";
-                    }
                     showQuiz('game-container', 'comp/quiz-screen.html', isected.name.replace(/^Name:\s*/, '').trim(), function() {
                         const container = document.getElementById("game-container");
                         container.style.display = "block";
@@ -305,17 +257,63 @@
                     selectedObject=isects[0].object;
                     addSelectedObject(selectedObject);
                     outlinePass.selectedObjects=selectedObjects;
-                }else
-                {
+                }
+                //else
+                //{
                     //console.log("mouse else.");
 
-                }
+                //}
                 //console.log("camera.fov:", camera.fov);
             }
 
+            function onSwipeStart(event) {
+                if(slowingDown)
+                {
+                    isSwiping = false;
+                    swipeDistance = 1;
+                    sphereRotationSpeed = constantSphereRotationSpeed;
+
+                }
+                else
+                {
+
+                    isSwiping = true;
+                    // Track the initial mouse position
+                    if (event.touches) {
+                        swipeStartX = event.touches[0].clientX;
+                    } else {
+                        swipeStartX = event.clientX;
+                    }
+                }
+            }
+
+            function onSwipeMove(event) {
+                if (isSwiping) {
+                    if (event.touches) {
+                        swipeEndX = event.touches[0].clientX;
+                    } else {
+                        swipeEndX = event.clientX;
+                    }
+
+                    // Calculate swipe distance
+                    swipeDistance = swipeEndX - swipeStartX;
+
+                    // Use the swipe distance to control sphere rotation speed
+                    if (Math.abs(swipeDistance) > swipeThreshold) {
+                        sphereRotationSpeed = swipeDistance * 0.002; // adjust rotation sensitivity (scale by 0.002)
+                    }
+                }
+            }
+
+            function onSwipeEnd(event) {
+                sphereRotationSpeed = swipeDistance / 5;
+                isSwiping = false;
+                slowingDown = true;  // Start slowing down rotation after the swipe
+            }
+            
             function animate(){
                 requestAnimationFrame(animate);
-                if(rotateSphere)
+                if(rotateSphere || slowingDown)
                 {
                     if(sim==0 && globe && Earthmat)
                     {
@@ -330,12 +328,20 @@
                         }
                     }
                     controls.update();
-                    group.rotation.y += spehereRotationSpeed/1000;
+                    group.rotation.y += sphereRotationSpeed/1000;
+                    
+                    if (slowingDown) {
+                        sphereRotationSpeed -= (1+(sphereRotationSpeed*0.0005)); // slow it down gently
+                        if (sphereRotationSpeed <= constantSphereRotationSpeed) {
+                            sphereRotationSpeed = constantSphereRotationSpeed;
+                            slowingDown = false;
+                        }
+                    }
+
                     w++;
-                    if(w==30)
-                    {
+                    if (w == 30) {
                         outlinePass.visibleEdgeColor.set(get_random_color());
-                        w=0;
+                        w = 0;
                     }
                     composer.render();
                 }
