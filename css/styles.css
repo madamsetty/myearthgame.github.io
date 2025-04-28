@@ -5,7 +5,7 @@ html, body {
     overflow: hidden;
 
     /* Set the background image */
-    background-image: url('../img/nightSkyDark.jpg');
+    background-image: url('../img/whiteCloudBackground.png');
     background-size: cover; /* Make the background image cover the entire page */
     background-position: center; /* Center the background image */
     background-attachment: fixed; /* Fix the background during scroll */
@@ -25,6 +25,7 @@ html, body {
     display: none;
     background-color: black;
     border: 1px solid gray;
+    z-index: 2000;
 }
 
 .close-btn {
@@ -47,3 +48,18 @@ html, body {
   height: 20px;
 }
 
+/* Container for the renderer with margin */
+#canvasWrapper {
+    margin: 20px; /* Apply margin around the renderer */
+    width: 100%; /* Ensure the wrapper takes full width of the viewport */
+    height: 100vh; /* Ensure the wrapper takes full height of the viewport */
+    box-sizing: border-box; /* Ensure margin is included within the width/height */
+    position: relative; /* Keeps it in the document flow */
+}
+
+/* Canvas element (renderer.domElement) */
+#threeCanvas {
+    width: 100%; /* The canvas fills the parent wrapper */
+    height: 100%; /* The canvas fills the parent wrapper */
+    display: block; /* Avoid inline-block spacing */
+}

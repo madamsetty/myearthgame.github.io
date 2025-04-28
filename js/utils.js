@@ -30,6 +30,29 @@ function loadFooter(id, url) {
   });
 }
 
+async function loadSVGMarker(url) {
+    console.log("In SVG marker");
+    const response = await fetch(url);
+    const svgText = await response.text();
+
+    const loader = new SVGLoader();
+    const svgData = loader.parse(svgText);
+
+    const path = svgData.paths[0]; // just first path
+    const shapes = SVGLoader.createShapes(path);
+    const shape = shapes[0];
+
+    const markerGeometry = new THREE.ShapeGeometry(shape);
+    const markerMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, side: THREE.DoubleSide });
+    const markerMesh = new THREE.Mesh(markerGeometry, markerMaterial);
+
+    markerMesh.scale.set(0.01, 0.01, 0.01);
+    markerMesh.rotation.x = -Math.PI / 2; // optional, point upward
+
+    return markerMesh;
+}
+
 // Make globally accessible
 window.loadHTML = loadHTML;
 window.loadFooter = loadFooter;
+window.loadSVGMarker = loadSVGMarker;

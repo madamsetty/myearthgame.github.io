@@ -9,7 +9,6 @@
         <script type="module" src="js/utils.js" defer></script>
         <script type="module" src="js/quiz.js" defer></script>
         
-        <!--script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script-->
         <script type="importmap">
         {
             "imports": {
@@ -26,31 +25,37 @@
             import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
             import { OutlinePass } from 'three/addons/postprocessing/OutlinePass.js';
             import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+            import { TextureLoader } from 'three';
             
             import { showQuiz } from './js/quiz.js';
 
             var w=0;
-
+            var isected,isects;
+            var scene,camera,renderer,controls,gradientSphere,globe,color,sub;
+            var amb,textureLoader,textu,Earthmat,Earthgeo,icosaedron,markerInfo,gMarker,mMarker,markers;            
+            var composer,renderPass,outlinePass;
             var mouse=new THREE.Vector2();
             var raycaster=new THREE.Raycaster();
             var alvos=[];
-            var isected,isects;
-            var scene,camera,renderer,controls,gradientSphere,globe,color,sub;
-            var composer,renderPass,outlinePass;
             var selectedObjects=[];
             var selectedObject;
-            var group=new THREE.Group();
             var dummy=[];
-            var amb,textureLoader,textu,Earthmat,Earthgeo,icosaedron,markerInfo,gMarker,mMarker,markers;
+            var group=new THREE.Group();
+            var sim = 0;
+
+            const maxSceneZoomCloser = 14;
+            const maxSceneZoomFar = 25;
+            var currentCameraPositionZ = 0;
+            const activityFrameTransistionAnimationSpeed = 2;
             
+            const markersRenderOrder = 1000;
+            const rendererSphereMargin = 25;
+            const shrinkSphereHeight = 0;
             const gradientSphereRenderOrder = 1;
             const globeSphereRenderOrder = 999;
-            const markersRenderOrder = 1000;
-
-            var sim = 0;
-            const markerCount = 0;
             const sphereWidthHeightSegments = 64;
             const sphereRadius = 4;
+            
             const kickoffSpherePullSpeed = 20;
             let constantSphereRotationSpeed = 1;
             var sphereRotationSpeed = constantSphereRotationSpeed;
@@ -62,11 +67,6 @@
             let swipeEndX = 0;            // Swipe end
             let swipeThreshold = 1;      // Minimum swipe distance to trigger
             let swipeDistance = 0;
-            
-            const maxSceneZoomCloser = 12;
-            const maxSceneZoomFar = 25;
-            var currentCameraPositionZ = 0;
-            const activityFrameTransistionAnimationSpeed = 2;
 
             // Set to true if icosaedron lines around object to be rendered.
             // Consumes 100Mb run time memory. 
@@ -75,6 +75,8 @@
             
             let rotateSphere = true;
             let showActivityWindow = false;
+            let loadBrandingImageMarkers = false;
+            const markerCount = 0;
             
             function isGroupInteractionEnabled(enabled) {
                 if(enabled)
@@ -93,14 +95,19 @@
 
                 camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,1,2000);
                 camera.position.set(0,0,maxSceneZoomCloser);
-
+                
                 renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
                 renderer.setPixelRatio(window.devicePixelRatio);
-                renderer.setSize(window.innerWidth,window.innerHeight);
+                renderer.setSize(window.innerWidth, window.innerHeight-shrinkSphereHeight);
                 renderer.setClearColor('#079',0);
-                //renderer.outputColorSpace=THREE.LinearSRGBColorSpace;
-
+                renderer.outputColorSpace=THREE.LinearSRGBColorSpace;
+                
                 document.body.appendChild(renderer.domElement);
+                
+                const canvas = renderer.domElement;
+                canvas.style.position = "relative";
+                canvas.style.marginTop = `${rendererSphereMargin}px`;
+                
                 window.addEventListener("resize",onWindowResize);
                 document.addEventListener('mousedown', onSwipeStart, false);
                 document.addEventListener('mousemove', onSwipeMove, false);
@@ -124,11 +131,11 @@
                 outlinePass=new OutlinePass(new THREE.Vector2(window.innerWidth,window.innerHeight),scene,camera);
                 composer.addPass(outlinePass);
 
-                outlinePass.edgeStrength = 3;
-                outlinePass.edgeGlow = 3;
+                outlinePass.edgeStrength = 1;
+                outlinePass.edgeGlow = 10;
 
-                amb=new THREE.AmbientLight("#fff",3);
-            	//scene.add(amb);
+                amb=new THREE.AmbientLight("#fff",2.8);
+            	scene.add(amb);
 
                 // Add gradient glow around sphere
                 const gradientMaterial = new THREE.ShaderMaterial({
@@ -137,10 +144,10 @@
                   depthWrite: false,
                   blending: THREE.AdditiveBlending, // helps smooth out glow
                   uniforms: {
-                    glowColor: { value: new THREE.Color(0xeeffff) },
+                    glowColor: { value: new THREE.Color(0x0953f1) },
                     viewVector: { value: new THREE.Vector3(0, 0, 1) },
-                    intensity: { value: 0.5 },
-                    fadeStrength: { value: 7.0 }
+                    intensity: { value: 0.55 },
+                    fadeStrength: { value: 4.0 }
                   },
                   vertexShader: `
                     varying vec3 vNormal;
@@ -173,7 +180,7 @@
                 
                 // Load earth surface from map image file
                 textureLoader=new THREE.TextureLoader();
-                textu=new THREE.TextureLoader().load("img/worldMap5400x2700.jpeg");
+                textu=new THREE.TextureLoader().load("img/worldMapBlue5400x2700.jpeg");
                 //textu.outputColorSpace=THREE.SRGBColorSpace;
                 Earthmat=new THREE.MeshStandardMaterial({color:"#fff",map:textu,transparent:true,opacity:1});
                 Earthgeo=new THREE.SphereGeometry(sphereRadius,
@@ -200,7 +207,7 @@
                 }
 
                 // Light
-                const light = new THREE.DirectionalLight(0xffffff, 2);
+                const light = new THREE.DirectionalLight(0xffffff, 2.5);
                 light.position.set(5, 5, 5);
                 scene.add(light);
                 
@@ -220,8 +227,8 @@
                 var activityScreen=document.getElementById("game-container");
                 //activityScreen.style.top=-20+event.clientY+"px";
                 //activityScreen.style.left=30+event.clientX+"px";
-                mouse.x=(event.clientX/window.innerWidth)*2-1;
-                mouse.y=-(event.clientY/window.innerHeight)*2+1;
+                mouse.x=(event.clientX/(window.innerWidth))*2-1;
+                mouse.y = -((event.clientY - rendererSphereMargin) / window.innerHeight) * 2 + 1;
                 mouse.z=0;
                 raycaster.setFromCamera(mouse,camera);
                 isects=raycaster.intersectObjects(alvos,false);
@@ -258,12 +265,6 @@
                     addSelectedObject(selectedObject);
                     outlinePass.selectedObjects=selectedObjects;
                 }
-                //else
-                //{
-                    //console.log("mouse else.");
-
-                //}
-                //console.log("camera.fov:", camera.fov);
             }
 
             function onSwipeStart(event) {
@@ -459,7 +460,7 @@
             function makeTextSprite(message, parameters = {}) {
               const fontface = parameters.fontface || 'Arial';
               const fontsize = parameters.fontsize || 32;
-              const canvas = document.getElementById('canvas');
+              canvas = document.getElementById('canvas');
               const context = canvas.getContext('2d');
               context.font = `${fontsize}px ${fontface}`;
               context.fillStyle = parameters.fillStyle || 'white';
@@ -506,15 +507,30 @@
                 // Add marker slightly above surface
                 const position = latLonToVector3(lat, lon, radius + 0.05);
             
-                // Sphere marker
-                const markerGeometry = new THREE.SphereGeometry(0.1, 16, 16);
-                
-                // Pin (cone)
-                //const markerGeometry = new THREE.ConeGeometry(0.10, 0.35, 16);
-                
-                const markerMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-                
-                dummy[index] = new THREE.Mesh(markerGeometry, markerMaterial);
+                if(loadBrandingImageMarkers)
+                {
+                    const loader = new TextureLoader();
+                    const texture = loader.load('img/save-the-children-logo.png');
+
+                    const markerMaterial = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
+                    const markerGeometry = new THREE.PlaneGeometry(1, 1);
+                    dummy[index] = new THREE.Mesh(markerGeometry, markerMaterial);
+
+                    // Optional scaling/rotation
+                    dummy[index].scale.set(0.5, 0.5, 0.5); // make it smaller
+                    dummy[index].rotation.x = -Math.PI / 2; // make it point upward
+                }
+                else {
+                    // Sphere marker
+                    const markerGeometry = new THREE.SphereGeometry(0.1, 16, 16);
+
+                    // Pin (cone)
+                    //const markerGeometry = new THREE.ConeGeometry(0.10, 0.35, 16);
+
+                    const markerMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+
+                    dummy[index] = new THREE.Mesh(markerGeometry, markerMaterial);
+                }
                 
                 // Rotate the cone so it points outward
                 // Convert lat/lon to Cartesian position
@@ -526,8 +542,7 @@
 
                 // Position cone tip slightly above the surface
                 const normal = new THREE.Vector3(x, y, z).normalize(); // surface normal
-                const axis = new THREE.Vector3(0, -1, 0); // cone's default direction
-                
+                const axis = new THREE.Vector3(0, -1, 0); // cone's default direction               
                 // Move cone so that its tip touches the surface (base sticks out)
                 const tipPosition = normal.clone().multiplyScalar(radius); // tip on surface
                 dummy[index].position.copy(tipPosition);
@@ -609,7 +624,6 @@
         <div id="header" class="header-container"></div>
         
         <div id="game-container"></div>
- 
         <div id="footer" class="footer-container"></div>
 
     </body>
