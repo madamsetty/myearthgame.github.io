@@ -218,8 +218,9 @@
                 markers =new THREE.InstancedMesh(gMarker, mMarker, markerCount);
 
                 // Example: Add a marker at New York City (lat: 40.7128, lon: -74.0060)
-                addMarker(40.7128, -74.0060, "New York", sphereRadius, 0); // New York
-                addMarker(28.617177625664986, 77.20245884547343, "New Delhi", sphereRadius, 1); // New Delhi
+                addMarker(40.7128, -74.0060, "New York", sphereRadius, 0);
+                addMarker(28.617177625664986, 77.20245884547343, "New Delhi", sphereRadius, 1);
+                addMarker(16.871890, 29.662979, "Sudan", sphereRadius, 1);
             }
 
             function onMouse(event){
@@ -244,8 +245,8 @@
                     showQuiz('game-container', 'comp/quiz-screen.html', isected.name.replace(/^Name:\s*/, '').trim(), function() {
                         const container = document.getElementById("game-container");
                         container.style.display = "block";
-                        const closeBtn = document.getElementById("quizCloseBtn");
-                        closeBtn.addEventListener("click", function () {
+                        const gameCloseBtn = document.getElementById("gameCloseBtn");
+                        gameCloseBtn.addEventListener("click", function () {
                                 container.style.transform = `translate(mouse.x, mouse.y) scale(0)`;
                                 container.style.display = "none";
 

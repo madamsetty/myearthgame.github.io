@@ -13,17 +13,15 @@ html, body {
 
 #game-container {
     position: absolute;
-    align-content: center;
+    display: none;
     width: 66%;
     height: 62%;
     top: 18%;
     left: 17%;
     margin: 0px;
-    padding: 2px;
     border-radius: 10px;
     opacity: 0.875;
-    display: none;
-    background-color: black;
+    background: url('../img/pinkCloud.jpg') center center / cover no-repeat;
     border: 1px solid gray;
     z-index: 2000;
 }

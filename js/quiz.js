@@ -19,11 +19,12 @@ let currentQuestionIndex = 0;
     let selectedCityQuestions;
 
 const questions = [
-      { title: "New York", question: "Is there a park in city?", options: ["Central Park", "Madrid", "Paris", "Rome"], correct: 0 },
-      { title: "New York", question: "What is 5 × 6?", options: ["30", "25", "35", "36"], correct: 0 },
-      { title: "New Delhi", question: "What is the host country?", options: ["India", "Carbon Dioxide", "Nitrogen", "Hydrogen"], correct: 0 },
-      { title: "New Delhi", question: "Who was the first President of the India?", options: ["John Adams", "Nehru", "George Washington", "Abraham Lincoln"], correct: 1 },
-      { title: "New Delhi", question: "What is nearest city?", options: ["Hamlet", "Shakespeare", "Austen", "Noida"], correct: 3 }
+    { loc: "New York", title: "New York", question: "Is there a park in city?", options: ["Central Park", "Madrid", "Paris", "Rome"], correct: 0 },
+    { loc: "New York", title: "New York", question: "What is 5 × 6?", options: ["30", "25", "35", "36"], correct: 0 },
+    { loc: "New Delhi", title: "New Delhi", question: "What is the host country?", options: ["India", "Carbon Dioxide", "Nitrogen", "Hydrogen"], correct: 0 },
+    { loc: "New Delhi", title: "New Delhi", question: "Who was the first President of the India?", options: ["John Adams", "Nehru", "George Washington", "Abraham Lincoln"], correct: 1 },
+    { loc: "New Delhi", title: "New Delhi", question: "What is nearest city?", options: ["Hamlet", "Shakespeare", "Austen", "Noida"], correct: 3 },
+    { loc: "Sudan", title: "Clean Water Truck", question: "* With access to a tanker truck filled with disease free drinking water, the health, sanitation and well being of a whole community improves especially for the children.\r\nTo deliver one truck per year how much per month?", image: "sudanWaterTruck.png", options: ["100€", "200€", "300€", "500€"], correct: 0 }
 ];
 
 //function showQuickScreen() {
@@ -31,31 +32,28 @@ const questions = [
 //}
 
 function loadQuestion(city, index) {
-    const container = document.getElementById("quiz-container");
-    const questionArea = document.getElementById("question-area");
-    const scoreEl = document.getElementById("score");
-    const totalEl = document.getElementById("total");
-    const progressBar = document.getElementById("progress-bar");
-    questionArea.innerHTML = "";
+    const container = document.getElementById("gameContainer");
+    const gameQuestionArea = document.getElementById("gameQuestionArea");
+    const gameTitle = document.getElementById("gameTitle");
+    const gameQuestion = document.getElementById("gameQuestion");
+    const gameImage = document.getElementById("gameImage");
+    const backButton = document.getElementById("backButton");
+    const submitButton = document.getElementById("submitButton");
+    const gameScore = document.getElementById("score");
+    const gameTotal = document.getElementById("total");
+    const gameProgressBar = document.getElementById("progress-bar");
+    gameQuestion.innerHTML = "";
     
     userAnswers = Array(questions.length).fill(null)
-    selectedCityQuestions = questions.filter(item => item.title === city)
+    selectedCityQuestions = questions.filter(item => item.loc === city)
+console.log("Location:", city, ", array:", selectedCityQuestions);
     
-    totalEl.textContent = selectedCityQuestions.length;
+    gameTotal.textContent = selectedCityQuestions.length;
     const q = selectedCityQuestions[index];
-    console.log(selectedCityQuestions);
 
-    const wrapper = document.createElement("div");
-    wrapper.classList.add("quiz-question");
-
-    const title = document.createElement("h2");
-    title.classList.add("quiz-title");
-    title.textContent = q.title;
-    wrapper.appendChild(title);
-
-    const question = document.createElement("p");
-    question.textContent = q.question;
-    wrapper.appendChild(question);
+    gameTitle.textContent = q.title;
+    gameQuestion.textContent = q.question;
+    gameImage.style.backgroundImage = `url(img/${q.image})`; 
 
     const table = document.createElement("table");
 
@@ -71,7 +69,7 @@ function loadQuestion(city, index) {
 
         const radio = document.createElement("input");
         radio.type = "radio";
-        radio.name = "quiz";
+        radio.name = "gameOptions";
         radio.value = i;
         if (userAnswers[index] === i) radio.checked = true;
 
@@ -81,59 +79,54 @@ function loadQuestion(city, index) {
         table.appendChild(tr);
     });
 
-    wrapper.appendChild(table);
-
-    const nav = document.createElement("div");
-    nav.style.marginTop = "20px";
-
-    const back = document.createElement("button");
-    back.className = "submit-btn";
-    back.textContent = "Back";
-    back.disabled = index === 0;
-    back.onclick = () => {
-        currentQuestionIndex--;
-        loadQuestion(city, currentQuestionIndex);
-        updateProgress();
-    };
-
-    const next = document.createElement("button");
-    next.className = "submit-btn";
-    next.textContent = index === questions.length - 1 ? "Finish" : "Next";
-    next.style.marginLeft = "10px";
-    next.onclick = () => {
-        const selected = document.querySelector('input[name="quiz"]:checked');
+    gameQuestion.appendChild(table);
+    
+    if(index > 0)
+    {
+        backButton.onclick = () => {
+            currentQuestionIndex--;
+            loadQuestion(city, currentQuestionIndex);
+            updateProgress();
+        };
+        backButton.style.display = "block";
+    }
+    else {
+        backButton.style.display = "none";
+    }
+    
+    submitButton.textContent = index === questions.length - 1 ? "Finish" : "Submit";
+    submitButton.style.marginLeft = "10px";
+    submitButton.onclick = () => {
+        const selected = document.querySelector('input[name="gameOptions"]:checked');
         if (!selected) 
             return alert("Please select an answer.");
 
         const ans = parseInt(selected.value);
-        console.log("Ans: ", ans, ", correct ans:", selectedCityQuestions[index].correct);
+console.log("Ans: ", ans, ", correct ans:", selectedCityQuestions[index].correct);
         if (userAnswers[index] !== null && userAnswers[index] === selectedCityQuestions[index].correct) 
             score--;
         userAnswers[index] = ans;
         if (ans === selectedCityQuestions[index].correct) 
             score++;
 
-        scoreEl.textContent = score;
-        console.log("selectedCityQuestions: ", selectedCityQuestions);
+        gameScore.textContent = score;
+console.log("selectedCityQuestions: ", selectedCityQuestions);
         if (currentQuestionIndex < selectedCityQuestions.length - 1) {
             
           currentQuestionIndex++;
           loadQuestion(city, currentQuestionIndex);
         } else {
-          showResult(questionArea, progressBar);
+          showResult(gameQuestionArea, gameProgressBar);
         }
-        updateProgress(progressBar);
+        updateProgress(gameProgressBar);
     };
 
-    nav.appendChild(back);
-    nav.appendChild(next);
-    wrapper.appendChild(nav);
-    questionArea.appendChild(wrapper);
+    //questionArea.appendChild(wrapper);
 }
 
 function updateProgress(progressBar) {
     console.log("currentQuestionIndex:", currentQuestionIndex, ", selectedCityQuestions len:", selectedCityQuestions.length, ", progress: ", ((currentQuestionIndex + 1) / selectedCityQuestions.length) * 100 + "%");
-    progressBar.style.width = ((currentQuestionIndex) / selectedCityQuestions.length) * 100 + "%";
+    progressBar.style.width = ((currentQuestionIndex) / selectedCityQuestions.length) * 80 + "%";
 }
 
 function showResult(questionArea, progressBar) {
