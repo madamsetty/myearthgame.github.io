@@ -24,7 +24,7 @@ const questions = [
     { loc: "New Delhi", title: "New Delhi", question: "What is the host country?", options: ["India", "Carbon Dioxide", "Nitrogen", "Hydrogen"], correct: 0 },
     { loc: "New Delhi", title: "New Delhi", question: "Who was the first President of the India?", options: ["John Adams", "Nehru", "George Washington", "Abraham Lincoln"], correct: 1 },
     { loc: "New Delhi", title: "New Delhi", question: "What is nearest city?", options: ["Hamlet", "Shakespeare", "Austen", "Noida"], correct: 3 },
-    { loc: "Sudan", title: "Clean Water Truck", question: "* With access to a tanker truck filled with disease free drinking water, the health, sanitation and well being of a whole community improves especially for the children.\r\nTo deliver one truck per year how much per month?", image: "sudanWaterTruck.png", options: ["100€", "200€", "300€", "500€"], correct: 0 }
+    { loc: "Sudan", title: "Clean Water Truck", question: "With access to a tanker truck filled with disease free drinking water, the health, sanitation and well being of a whole community improves especially for the children.\r\nTo deliver one truck per year how much per month?", image: "sudanWaterTruck.png", options: ["100€", "200€", "300€", "500€"], correct: 0 }
 ];
 
 //function showQuickScreen() {

@@ -21,7 +21,7 @@ html, body {
     margin: 0px;
     border-radius: 10px;
     opacity: 0.875;
-    background: url('../img/pinkCloud.jpg') center center / cover no-repeat;
+    background: url('../img/whiteCloudBackground.png') center center / cover no-repeat;
     border: 1px solid gray;
     z-index: 2000;
 }
