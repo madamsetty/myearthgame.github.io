@@ -154,6 +154,8 @@ function showResult(questionArea, progressBar) {
     userAnswers = null;
     const submitButton = document.getElementById("submitButton");
     submitButton.textContent = finishButtonText;
+    document.getElementById("backButton").style.display = "none";
+    
 }
 
 function startTimer(timeoutSecs) {
