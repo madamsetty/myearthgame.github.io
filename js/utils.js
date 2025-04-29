@@ -65,10 +65,10 @@ function showIdleScreen() {
     const centerY = headerRect.height / 2;
 
     const logoOffsetX = centerX - (logo.offsetLeft + logo.offsetWidth / 2);
-    const logoOffsetY = centerY - logo.offsetHeight - 10 - (logo.offsetTop + logo.offsetHeight / 2);
+    const logoOffsetY = centerY + 50 - logo.offsetHeight - 10 - (logo.offsetTop + logo.offsetHeight / 2);
 
     const titleOffsetX = centerX - (title.offsetLeft + title.offsetWidth / 2)+200;
-    const titleOffsetY = centerY + 10 - (title.offsetTop + title.offsetHeight / 2);
+    const titleOffsetY = centerY + 100 - (title.offsetTop + title.offsetHeight / 2);
 
     logo.style.transform = `translate(${logoOffsetX}px, ${logoOffsetY}px)`;
     title.style.transform = `translate(${titleOffsetX}px, ${titleOffsetY}px)`;
