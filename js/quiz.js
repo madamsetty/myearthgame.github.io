@@ -12,11 +12,12 @@ export function showQuiz(id, url, city, callback) {
 // Make globally accessible
 window.showQuiz = showQuiz;
 
+let stopTimer = false;
 let currentQuestionIndex = 0;
-    let score = 0;
-    let userAnswers;
-    
-    let selectedCityQuestions;
+let score = 0;
+let userAnswers;
+
+let selectedCityQuestions;
 
 const questions = [
     { loc: "New York", title: "New York", question: "Is there a park in city?", options: ["Central Park", "Madrid", "Paris", "Rome"], correct: 0 },
@@ -24,7 +25,7 @@ const questions = [
     { loc: "New Delhi", title: "New Delhi", question: "What is the host country?", options: ["India", "Carbon Dioxide", "Nitrogen", "Hydrogen"], correct: 0 },
     { loc: "New Delhi", title: "New Delhi", question: "Who was the first President of the India?", options: ["John Adams", "Nehru", "George Washington", "Abraham Lincoln"], correct: 1 },
     { loc: "New Delhi", title: "New Delhi", question: "What is nearest city?", options: ["Hamlet", "Shakespeare", "Austen", "Noida"], correct: 3 },
-    { loc: "Sudan", title: "Clean Water Truck", question: "With access to a tanker truck filled with disease free drinking water, the health, sanitation and well being of a whole community improves especially for the children.\r\nTo deliver one truck per year how much per month?", image: "sudanWaterTruck.png", options: ["100€", "200€", "300€", "500€"], correct: 0 }
+    { loc: "Sudan", title: "Clean Water Truck", detail: "With access to a tanker truck filled with disease-free drinking water, the health, sanitation and well being of a whole community improves especially for the children.", question: "To deliver one truck per year how much per month?", image: "sudanWaterTruck.png", options: ["100€", "200€", "300€", "500€"], timeout: 25, correct: 0 }
 ];
 
 //function showQuickScreen() {
@@ -52,8 +53,23 @@ console.log("Location:", city, ", array:", selectedCityQuestions);
     const q = selectedCityQuestions[index];
 
     gameTitle.textContent = q.title;
-    gameQuestion.textContent = q.question;
-    gameImage.style.backgroundImage = `url(img/${q.image})`; 
+    
+    const qDetail = document.createElement('p');
+    qDetail.classList.add('question-content');
+    qDetail.textContent = q.detail;
+    gameQuestion.appendChild(qDetail);
+    
+    const qQuestion = document.createElement('p');
+    qQuestion.classList.add('question-content');
+    qQuestion.textContent = q.question
+    
+    gameQuestion.appendChild(qQuestion);
+    
+    if(!q.image) {
+        q.image = "stc-logo.png";
+    }
+    
+    gameImage.src = `img/${q.image}`; 
 
     const table = document.createElement("table");
 
@@ -97,6 +113,7 @@ console.log("Location:", city, ", array:", selectedCityQuestions);
     submitButton.textContent = index === questions.length - 1 ? "Finish" : "Submit";
     submitButton.style.marginLeft = "10px";
     submitButton.onclick = () => {
+        stopTimer = true;
         const selected = document.querySelector('input[name="gameOptions"]:checked');
         if (!selected) 
             return alert("Please select an answer.");
@@ -122,6 +139,7 @@ console.log("selectedCityQuestions: ", selectedCityQuestions);
     };
 
     //questionArea.appendChild(wrapper);
+    startTimer(q.timeout, 0);
 }
 
 function updateProgress(progressBar) {
@@ -136,4 +154,54 @@ function showResult(questionArea, progressBar) {
     selectedCityQuestions = null;
     score = 0;
     userAnswers = null;
+    const submitButton = document.getElementById("submitButton");
+    submitButton.textContent = "Close";
+}
+
+function startTimer(timeoutSecs) {
+    let pageTimeoutSecs = 30;
+    let timerStarted = false;
+    const button = document.getElementById('submitButton');
+    const buttonText = button.textContent;
+    
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !timerStarted) {
+            timerStarted = true;
+
+            const countdown = setInterval(() => {
+                pageTimeoutSecs--;
+                if (pageTimeoutSecs > 0 && !stopTimer) {
+                    if(pageTimeoutSecs <= timeoutSecs) {
+                        button.style.fontWeight = "bold";
+                        button.textContent =  buttonText + ` ${pageTimeoutSecs}`;
+                        
+                        const ripple = document.createElement('span');
+                        ripple.classList.add('ripple');
+                        ripple.style.left = button.style.left;
+                        ripple.style.top = button.style.top;
+                        ripple.style.width = button.style.width;
+                        ripple.style.height = button.style.height;
+                        button.appendChild(ripple);
+
+                        ripple.addEventListener('animationend', () => {
+                            ripple.remove();
+                            });
+                    }
+                } else {
+                    clearInterval(countdown);
+                    if(!selectedCityQuestions) {
+                        button.textContent =  "Close";    
+                    }
+                    else {
+                        button.textContent =  buttonText;
+                    }
+                    button.style.fontWeight = "";
+                }
+            }, 1000);
+        }
+      });
+    });
+    
+    observer.observe(button);
 }

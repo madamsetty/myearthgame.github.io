@@ -15,12 +15,12 @@ html, body {
     position: absolute;
     display: none;
     width: 66%;
-    height: 62%;
+    height: 70%;
     top: 18%;
     left: 17%;
     margin: 0px;
     border-radius: 10px;
-    opacity: 0.875;
+    opacity: 0.925;
     background: url('../img/whiteCloudBackground.png') center center / cover no-repeat;
     border: 1px solid gray;
     z-index: 2000;
