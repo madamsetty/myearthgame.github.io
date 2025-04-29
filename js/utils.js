@@ -85,10 +85,11 @@ function restoreToActiveScreen() {
     const logo = document.getElementById('logo');
     const title = document.getElementById('title');
     
-    logo.style.transform = `translate(0, 0)`;
-    title.style.transform = `translate(0, 0)`;
-    title.classList.remove('breathing'); // Remove breathing effect when restoring
-
+    if(logo) {
+        logo.style.transform = `translate(0, 0)`;
+        title.style.transform = `translate(0, 0)`;
+        title.classList.remove('breathing'); // Remove breathing effect when restoring
+    }
     setTimeout(() => {
         header.classList.remove('fullscreen');
     }, 300);

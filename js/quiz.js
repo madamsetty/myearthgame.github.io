@@ -1,7 +1,6 @@
 import { loadHTML } from './utils.js';
     
 export function showQuiz(id, url, city, callback) {
-    console.log("In showQuiz, city: '", city, "'");
     loadHTML(id, url, function () {
         loadQuestion(city, 0);
         
@@ -9,7 +8,6 @@ export function showQuiz(id, url, city, callback) {
     });
 }
 
-// Make globally accessible
 window.showQuiz = showQuiz;
 
 let stopTimer = false;
@@ -18,6 +16,8 @@ let score = 0;
 let userAnswers;
 
 let selectedCityQuestions;
+let finishButtonText = "Finish";
+let subitButtonText = "Submit";
 
 const questions = [
     { loc: "New York", title: "New York", question: "Is there a park in city?", options: ["Central Park", "Madrid", "Paris", "Rome"], correct: 0 },
@@ -27,10 +27,6 @@ const questions = [
     { loc: "New Delhi", title: "New Delhi", question: "What is nearest city?", options: ["Hamlet", "Shakespeare", "Austen", "Noida"], correct: 3 },
     { loc: "Sudan", title: "Clean Water Truck", detail: "With access to a tanker truck filled with disease-free drinking water, the health, sanitation and well being of a whole community improves especially for the children.", question: "To deliver one truck per year how much per month?", image: "sudanWaterTruck.png", options: ["100€", "200€", "300€", "500€"], timeout: 25, correct: 0 }
 ];
-
-//function showQuickScreen() {
-//    document.getElementById('submit').addEventListener('click', QuizApp.getNextQuestion);//
-//}
 
 function loadQuestion(city, index) {
     const container = document.getElementById("gameContainer");
@@ -45,9 +41,8 @@ function loadQuestion(city, index) {
     const gameProgressBar = document.getElementById("progress-bar");
     gameQuestion.innerHTML = "";
     
-    userAnswers = Array(questions.length).fill(null)
-    selectedCityQuestions = questions.filter(item => item.loc === city)
-console.log("Location:", city, ", array:", selectedCityQuestions);
+    userAnswers = Array(questions.length).fill(null);
+    selectedCityQuestions = questions.filter(item => item.loc === city);
     
     gameTotal.textContent = selectedCityQuestions.length;
     const q = selectedCityQuestions[index];
@@ -110,16 +105,20 @@ console.log("Location:", city, ", array:", selectedCityQuestions);
         backButton.style.display = "none";
     }
     
-    submitButton.textContent = index === questions.length - 1 ? "Finish" : "Submit";
+    submitButton.textContent = index === questions.length - 1 ? finishButtonText : subitButtonText;
     submitButton.style.marginLeft = "10px";
     submitButton.onclick = () => {
+        if(submitButton.textContent === finishButtonText) {
+            document.getElementById('gameCloseBtn').click();
+            return;
+        }
+        
         stopTimer = true;
         const selected = document.querySelector('input[name="gameOptions"]:checked');
         if (!selected) 
             return alert("Please select an answer.");
 
         const ans = parseInt(selected.value);
-console.log("Ans: ", ans, ", correct ans:", selectedCityQuestions[index].correct);
         if (userAnswers[index] !== null && userAnswers[index] === selectedCityQuestions[index].correct) 
             score--;
         userAnswers[index] = ans;
@@ -127,7 +126,6 @@ console.log("Ans: ", ans, ", correct ans:", selectedCityQuestions[index].correct
             score++;
 
         gameScore.textContent = score;
-console.log("selectedCityQuestions: ", selectedCityQuestions);
         if (currentQuestionIndex < selectedCityQuestions.length - 1) {
             
           currentQuestionIndex++;
@@ -138,13 +136,13 @@ console.log("selectedCityQuestions: ", selectedCityQuestions);
         updateProgress(gameProgressBar);
     };
 
-    //questionArea.appendChild(wrapper);
     startTimer(q.timeout, 0);
 }
 
 function updateProgress(progressBar) {
-    console.log("currentQuestionIndex:", currentQuestionIndex, ", selectedCityQuestions len:", selectedCityQuestions.length, ", progress: ", ((currentQuestionIndex + 1) / selectedCityQuestions.length) * 100 + "%");
-    progressBar.style.width = ((currentQuestionIndex) / selectedCityQuestions.length) * 80 + "%";
+    if(selectedCityQuestions && progressBar) {
+        progressBar.style.width = (currentQuestionIndex / selectedCityQuestions.length) * 80 + "%";
+    }
 }
 
 function showResult(questionArea, progressBar) {
@@ -155,7 +153,7 @@ function showResult(questionArea, progressBar) {
     score = 0;
     userAnswers = null;
     const submitButton = document.getElementById("submitButton");
-    submitButton.textContent = "Close";
+    submitButton.textContent = finishButtonText;
 }
 
 function startTimer(timeoutSecs) {
@@ -191,7 +189,7 @@ function startTimer(timeoutSecs) {
                 } else {
                     clearInterval(countdown);
                     if(!selectedCityQuestions) {
-                        button.textContent =  "Close";    
+                        button.textContent =  finishButtonText;    
                     }
                     else {
                         button.textContent =  buttonText;

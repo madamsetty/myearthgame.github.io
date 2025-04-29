@@ -4,7 +4,6 @@ html, body {
     height: 100%;
     overflow: hidden;
 
-    /* Set the background image */
     background-image: url('../img/whiteCloudBackground.png');
     background-size: cover; /* Make the background image cover the entire page */
     background-position: center; /* Center the background image */
@@ -22,7 +21,7 @@ html, body {
     transition: height 0.8s ease;
     overflow: hidden;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    z-index: 1000;
+    z-index: 6000;
 }
 
 #game-container {

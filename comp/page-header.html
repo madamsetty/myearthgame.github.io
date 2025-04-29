@@ -13,7 +13,7 @@
     #logo, #title {
         position: absolute;
         transition: transform 0.8s ease, font-size 0.8s ease;
-        white-space: nowrap; /* Prevent text wrapping */
+        white-space: nowrap;
     }
 
     #logo {
@@ -26,23 +26,21 @@
     #title {
         top: 25px;
         font-size: 2em;
-        margin: 0;
+        margin: 0px 5px 5px 5px;
         color: red;
         text-shadow: 1px 1px 3px grey;
-        right: 5px; /* Keep title at the far right */
-        transform: none; /* Remove the previous translation */
+        right: 5px;
+        transform: none;
     }
 
     #header.fullscreen {
         height: 100vh;
     }
 
-    /* Add a class to scale up the title font size */
     #header.fullscreen #title {
-        font-size: 6em; /* Title font size becomes larger */
+        font-size: 6em;
     }
 
-    /* Breathing effect (font-size and position adjustment) */
     @keyframes breathing {
         0% {
             font-size: 6em;
@@ -55,7 +53,6 @@
         }
     }
 
-    /* Add this class when the breathing effect is triggered */
     .breathing {
       animation: breathing 8s infinite ease-in-out;
     }

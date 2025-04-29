@@ -64,9 +64,9 @@
             // Swipe on sphere
             let isSwiping = false;
             let slowingDown = false;
-            let swipeStartX = 0;          // Swipe start
-            let swipeEndX = 0;            // Swipe end
-            let swipeThreshold = 1;      // Minimum swipe distance to trigger
+            let swipeStartX = 0;
+            let swipeEndX = 0;
+            let swipeThreshold = 1;
             let swipeDistance = 0;
 
             // Set to true if icosaedron lines around object to be rendered.
@@ -117,9 +117,9 @@
                 document.addEventListener('click', onMouse, false);
 
                 // Touch screen events
-                //document.addEventListener('touchstart', onSwipeStart, false);
-                //document.addEventListener('touchmove', onSwipeMove, false);
-                //document.addEventListener('touchend', onSwipeEnd, false);
+                document.addEventListener('touchstart', onSwipeStart, false);
+                document.addEventListener('touchmove', onSwipeMove, false);
+                document.addEventListener('touchend', onSwipeEnd, false);
 
                 // Set maximum zooming levels
                 controls = new OrbitControls(camera,renderer.domElement);
@@ -174,15 +174,12 @@
                   `
                 });
 
-                // Create a gradient sphere around the earth
                 gradientSphere = new THREE.Mesh(new THREE.SphereGeometry(sphereRadius * 1.05, sphereWidthHeightSegments, sphereWidthHeightSegments), gradientMaterial);
                 gradientSphere.rendereOrder = gradientSphereRenderOrder;
                 group.add(gradientSphere);
-                
-                // Load earth surface from map image file
+
                 textureLoader=new THREE.TextureLoader();
                 textu=new THREE.TextureLoader().load("img/worldMapBlue5400x2700.jpeg");
-                //textu.outputColorSpace=THREE.SRGBColorSpace;
                 Earthmat=new THREE.MeshStandardMaterial({color:"#fff",map:textu,transparent:true,opacity:1});
                 Earthgeo=new THREE.SphereGeometry(sphereRadius,
                                                   sphereWidthHeightSegments,
@@ -195,11 +192,10 @@
                 // Takes about 400-500Mb runtime memory
                 if(showIcosaedron)
                 {
-                    let icosaedronSphereRadius = sphereRadius + 0.1; // define this separately
+                    let icosaedronSphereRadius = sphereRadius + 0.1;
                     icosaedron = new THREE.Mesh(new THREE.IcosahedronGeometry(icosaedronSphereRadius,10),new THREE.MeshStandardMaterial({color:'#08b',wireframe:true}));
                 }
                 
-                // Add the graticule lines to the scene
                 if(showLatLngGrid)
                 {
                     const gridLines = createLatLongLines(sphereRadius + 0.02, 18, 36);
@@ -225,23 +221,17 @@
             }
 
             function onMouse(event){
-                //console.log("mouse event.");
                 var activityScreen=document.getElementById("game-container");
-                //activityScreen.style.top=-20+event.clientY+"px";
-                //activityScreen.style.left=30+event.clientX+"px";
                 mouse.x=(event.clientX/(window.innerWidth))*2-1;
                 mouse.y = -((event.clientY - rendererSphereMargin) / window.innerHeight) * 2 + 1;
                 mouse.z=0;
                 raycaster.setFromCamera(mouse,camera);
                 isects=raycaster.intersectObjects(alvos,false);
                 if(isects.length>0 && isects[0].object.kx ){
-                    // Stop rotation and animate first before showing frame
                     rotateSphere = false;
                     currentCameraPositionZ = camera.position.z;
                     showActivityWindow = true;
-                    //isGroupInteractionEnabled(false);
                     
-                    //console.log("intersect size is: ", isects.length );
                     isected=isects[0].object;//dspanC.innerText=isected.name;
                     showQuiz('game-container', 'comp/quiz-screen.html', isected.name.replace(/^Name:\s*/, '').trim(), function() {
                         const container = document.getElementById("game-container");
@@ -256,9 +246,6 @@
                                 outlinePass.selectedObjects=false;
 
                                 showActivityWindow = false;
-                                //isGroupInteractionEnabled(true);
-
-                                // Restart rotation
                                 rotateSphere = true;
                         });
                     });
@@ -348,7 +335,6 @@
                     }
                     composer.render();
                 }
-                //console.log("Zoom distance:", camera.position.distanceTo(controls.target).toFixed(2), ", z: ", camera.position.z);
             }
             
             function animateToActivityView()
@@ -371,11 +357,7 @@
                     }
 
                     renderer.render(scene, camera);
-                    console.log("camera.position.z:", camera.position.z, " > currentCameraPositionZ:", currentCameraPositionZ);
                 }
-                
-                //console.log("Animated scene current zoom posZ:", currentCameraPositionZ, " maxSceneZoomFar: ", maxSceneZoomFar, " camera.pos.z:", camera.position.z);
-                console.log("Animated scene current zoom posZ:", currentCameraPositionZ, " camera.pos.z:", camera.position.z);
             }
 
             function get_random_color(){
@@ -475,7 +457,6 @@
               return sprite;
             }
 
-            // Add latitude/longitude labels
             function addLatLongLabels(radius) {
               const latLabels = [ -60, -30, 0, 30, 60 ];
               const lonLabels = [ -120, -60, 0, 60, 120 ];
@@ -503,10 +484,8 @@
               }
             }
             
-            // 🗽 Add markers
             function addMarker(lat, lon, name, radius, index) 
             {
-                // Add marker slightly above surface
                 const position = latLonToVector3(lat, lon, radius + 0.05);
             
                 if(loadBrandingImageMarkers)
@@ -518,15 +497,11 @@
                     const markerGeometry = new THREE.PlaneGeometry(1, 1);
                     dummy[index] = new THREE.Mesh(markerGeometry, markerMaterial);
 
-                    // Optional scaling/rotation
-                    dummy[index].scale.set(0.5, 0.5, 0.5); // make it smaller
-                    dummy[index].rotation.x = -Math.PI / 2; // make it point upward
+                    dummy[index].scale.set(0.5, 0.5, 0.5);
+                    dummy[index].rotation.x = -Math.PI / 2;
                 }
                 else {
-                    // Sphere marker
                     const markerGeometry = new THREE.SphereGeometry(0.1, 16, 16);
-
-                    // Pin (cone)
                     //const markerGeometry = new THREE.ConeGeometry(0.10, 0.35, 16);
 
                     const markerMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
@@ -543,10 +518,10 @@
                 const z = radius * Math.sin(phi) * Math.sin(theta);
 
                 // Position cone tip slightly above the surface
-                const normal = new THREE.Vector3(x, y, z).normalize(); // surface normal
-                const axis = new THREE.Vector3(0, -1, 0); // cone's default direction               
+                const normal = new THREE.Vector3(x, y, z).normalize();
+                const axis = new THREE.Vector3(0, -1, 0);               
                 // Move cone so that its tip touches the surface (base sticks out)
-                const tipPosition = normal.clone().multiplyScalar(radius); // tip on surface
+                const tipPosition = normal.clone().multiplyScalar(radius);
                 dummy[index].position.copy(tipPosition);
                 dummy[index].quaternion.setFromUnitVectors(axis, normal);
                 
@@ -572,8 +547,6 @@
                 const questionEl = document.createElement('div');
                 questionEl.classList.add('quiz-question');
 
-
-                // Create title
                 const title = document.createElement('h2');
                 title.textContent = "City Name";
                 questionEl.appendChild(title);
@@ -612,7 +585,6 @@
                 container.appendChild(questionEl);
             }
 
-            // Load header and footer
             loadHTML('header', 'comp/page-header.html');
             loadFooter('footer', 'comp/page-footer.html');
 
@@ -629,7 +601,6 @@
                     restoreToActiveScreen();
                 }
 
-                // Detect user interactions
                 window.onload = resetTimer;
                 document.onmousemove = resetTimer;
                 document.onkeydown = resetTimer;
@@ -637,7 +608,6 @@
                 document.ontouchstart = resetTimer;
             }
 
-            // Start the inactivity timer
             showScreensaverOnInactivity();
         </script>
     </head>
