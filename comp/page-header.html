@@ -1,47 +1,66 @@
 <!-- Page Title with Icon at the top left -->
 <style>
     .title-container {
-        position: absolute;
-        top: 0px;
-        left: 0px;
-        display: flex;
-        align-items: center;
-        font-size: 50px; /* Set font size for title */
-        font-weight: bold;
-        font-family: 'Brush Script MT', cursive;
-        color: white;
-        text-shadow: 0 0 5px black;
-        margin-left: 0px;
-        color: white; /* Set text color */
-        z-index: 2; /* Ensure title appears above other content */
-        background-color: white;
-        width: 100%;
+        position: relative;
         height: 75px;
-        border-radius: 10px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        background-color: white;
+        color: #333;
+        transition: height 0.8s ease;
+        overflow: hidden;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     }
 
-    .title-container img {
-        max-width: 260px;
-        width: 260px;
-        max-height: 80px;
-        height: 80px;
-        margin: 0px 0px 0px 1%;
-    }
-
-    .title-container span {
+    #logo, #title {
         position: absolute;
-        font-size: 2.2rem;
-        font-weight: bold;
-        font-family: 'Source Sans 3';
+        transition: transform 0.8s ease, font-size 0.8s ease;
+        white-space: nowrap; /* Prevent text wrapping */
+    }
+
+    #logo {
+        height: 75px;
+        margin: 0px 5px 5px 5px;
+        top: 0px;
+        left: 5px;
+    }
+
+    #title {
+        top: 25px;
+        font-size: 2em;
+        margin: 0;
         color: red;
-        text-shadow: 0 0 5px gray;
-        margin-right: 1%;
-        right: 0px;
+        text-shadow: 1px 1px 3px grey;
+        right: 5px; /* Keep title at the far right */
+        transform: none; /* Remove the previous translation */
+    }
+
+    #header.fullscreen {
+        height: 100vh;
+    }
+
+    /* Add a class to scale up the title font size */
+    #header.fullscreen #title {
+        font-size: 6em; /* Title font size becomes larger */
+    }
+
+    /* Breathing effect (font-size and position adjustment) */
+    @keyframes breathing {
+        0% {
+            font-size: 6em;
+        }
+        50% {
+            font-size: 6.3em;
+        }
+        100% {
+            font-size: 6em;
+        }
+    }
+
+    /* Add this class when the breathing effect is triggered */
+    .breathing {
+      animation: breathing 8s infinite ease-in-out;
     }
 </style>
 
-<div id="titleContainer" class="title-container">
-    <img src="img/scus-logo.svg" alt="https://www.savethechildren.org.au/about-us/save-the-childrens-charity-work/papua-new-guinea-charity">
-    <span>How much could you help?</span>
-</div>
+
+<img id="logo" src="../img/save-the-children-with-name-logo.png" alt="Save the Children Logo" />
+<h1 id="title">How much could you help?</h1>

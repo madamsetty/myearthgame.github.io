@@ -17,7 +17,7 @@ function loadFooter(id, url) {
     const settingsBtn = document.getElementById("settingsIcon");
     if (settingsBtn) {
       settingsBtn.addEventListener("click", function () {
-        alert("Settings Button in child.html clicked!");
+          alert("Settings Button in child.html clicked!");
       });
     }
 
@@ -52,7 +52,51 @@ async function loadSVGMarker(url) {
     return markerMesh;
 }
 
+function showIdleScreen() {
+    const header = document.getElementById('header');
+    const logo = document.getElementById('logo');
+    const title = document.getElementById('title');
+    
+    header.classList.add('fullscreen');
+
+  setTimeout(() => {
+    const headerRect = header.getBoundingClientRect();
+    const centerX = headerRect.width / 2;
+    const centerY = headerRect.height / 2;
+
+    const logoOffsetX = centerX - (logo.offsetLeft + logo.offsetWidth / 2);
+    const logoOffsetY = centerY - logo.offsetHeight - 10 - (logo.offsetTop + logo.offsetHeight / 2);
+
+    const titleOffsetX = centerX - (title.offsetLeft + title.offsetWidth / 2)+200;
+    const titleOffsetY = centerY + 10 - (title.offsetTop + title.offsetHeight / 2);
+
+    logo.style.transform = `translate(${logoOffsetX}px, ${logoOffsetY}px)`;
+    title.style.transform = `translate(${titleOffsetX}px, ${titleOffsetY}px)`;
+
+    // Start breathing animation after scale animation completes (delay of 0.8s)
+    setTimeout(() => {
+      title.classList.add('breathing'); // Start breathing animation
+    }, 800); // After 0.8s to match the scale transition duration
+  }, 300); // Delay for smoother effect
+}
+
+function restoreToActiveScreen() {
+    const header = document.getElementById('header');
+    const logo = document.getElementById('logo');
+    const title = document.getElementById('title');
+    
+    logo.style.transform = `translate(0, 0)`;
+    title.style.transform = `translate(0, 0)`;
+    title.classList.remove('breathing'); // Remove breathing effect when restoring
+
+    setTimeout(() => {
+        header.classList.remove('fullscreen');
+    }, 300);
+}
+
 // Make globally accessible
 window.loadHTML = loadHTML;
 window.loadFooter = loadFooter;
 window.loadSVGMarker = loadSVGMarker;
+window.showIdleScreen = showIdleScreen;
+window.restoreToActiveScreen = restoreToActiveScreen;

@@ -42,6 +42,7 @@
             var dummy=[];
             var group=new THREE.Group();
             var sim = 0;
+            let screenInActivityTimeoutSecs = 30;
 
             const maxSceneZoomCloser = 14;
             const maxSceneZoomFar = 25;
@@ -49,7 +50,7 @@
             const activityFrameTransistionAnimationSpeed = 2;
             
             const markersRenderOrder = 1000;
-            const rendererSphereMargin = 25;
+            const rendererSphereMargin = 0;
             const shrinkSphereHeight = 0;
             const gradientSphereRenderOrder = 1;
             const globeSphereRenderOrder = 999;
@@ -564,7 +565,6 @@
             
             init();
             animate();
-            //animateToActivityView();
             
             function addQuizQuestion(questionText, options, correctAnswerIndex) {
                 const container = document.getElementById('quiz-container');
@@ -610,14 +610,35 @@
 
                 questionEl.appendChild(checkBtn);
                 container.appendChild(questionEl);
-        }
+            }
 
             // Load header and footer
             loadHTML('header', 'comp/page-header.html');
             loadFooter('footer', 'comp/page-footer.html');
 
-        // Example usage
-        //addQuizQuestion('What is the capital of France?', ['Berlin', 'Madrid', 'Paris', 'Rome'], 2);
+            function showScreensaverOnInactivity() {
+                let timer;
+
+                function onInactive() {
+                    showIdleScreen();
+                }
+
+                function resetTimer() {
+                    clearTimeout(timer);
+                    timer = setTimeout(onInactive, screenInActivityTimeoutSecs * 1000);
+                    restoreToActiveScreen();
+                }
+
+                // Detect user interactions
+                window.onload = resetTimer;
+                document.onmousemove = resetTimer;
+                document.onkeydown = resetTimer;
+                document.onscroll = resetTimer;
+                document.ontouchstart = resetTimer;
+            }
+
+            // Start the inactivity timer
+            showScreensaverOnInactivity();
         </script>
     </head>
 
