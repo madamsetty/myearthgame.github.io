@@ -214,10 +214,16 @@
                 mMarker.defines={ USE_UV: " " }; // needed to be set to be able to work with UVs
                 markers =new THREE.InstancedMesh(gMarker, mMarker, markerCount);
 
-                // Example: Add a marker at New York City (lat: 40.7128, lon: -74.0060)
-                addMarker(40.7128, -74.0060, "New York", sphereRadius, 0);
-                addMarker(28.617177625664986, 77.20245884547343, "New Delhi", sphereRadius, 1);
+                // Add a markers
+                addMarker(28.617177625664986, 77.20245884547343, "India", sphereRadius, 1);
                 addMarker(16.871890, 29.662979, "Sudan", sphereRadius, 1);
+                addMarker(31.505688716093005, 34.47440122930478, "Gaza", sphereRadius, 1);
+                addMarker(48.93848108965053, 31.488680986772465, "Ukraine", sphereRadius, 1);
+                addMarker(0.6135656340107651, 37.86454680897832, "Kenya", sphereRadius, 1);
+                addMarker(24.16779844515624, 90.26363590901566, "Bangladesh", sphereRadius, 1);
+                addMarker(33.89401745043521, 64.7245127621119, "Afghanistan", sphereRadius, 1);
+                addMarker(29.990424026063568, 69.333899656654, "Pakistan", sphereRadius, 1);
+                
             }
 
             function onMouse(event){

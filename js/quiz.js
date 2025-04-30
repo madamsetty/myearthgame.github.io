@@ -20,12 +20,14 @@ let finishButtonText = "Finish";
 let subitButtonText = "Submit";
 
 const questions = [
-    { loc: "New York", title: "New York", question: "Is there a park in city?", options: ["Central Park", "Madrid", "Paris", "Rome"], correct: 0 },
-    { loc: "New York", title: "New York", question: "What is 5 × 6?", options: ["30", "25", "35", "36"], correct: 0 },
-    { loc: "New Delhi", title: "New Delhi", question: "What is the host country?", options: ["India", "Carbon Dioxide", "Nitrogen", "Hydrogen"], correct: 0 },
-    { loc: "New Delhi", title: "New Delhi", question: "Who was the first President of the India?", options: ["John Adams", "Nehru", "George Washington", "Abraham Lincoln"], correct: 1 },
-    { loc: "New Delhi", title: "New Delhi", question: "What is nearest city?", options: ["Hamlet", "Shakespeare", "Austen", "Noida"], correct: 3 },
-    { loc: "Sudan", title: "Clean Water Truck", detail: "With access to a tanker truck filled with disease-free drinking water, the health, sanitation and well being of a whole community improves especially for the children.", question: "To deliver one truck per year how much per month?", image: "sudanWaterTruck.png", options: ["100€", "200€", "300€", "500€"], timeout: 25, correct: 0 }
+    { loc: "India", title: "India - Water Filter Plant", detail: "2nd larget populated", question: "Find captial city?", options: ["New Delhi", "Bangalore", "Chennai", "Mumbai"], correct: 0 },
+    { loc: "Sudan", title: "Sudan - Clean Water Truck", detail: "With access to a tanker truck filled with disease-free drinking water, the health, sanitation and well being of a whole community improves especially for the children.", question: "To deliver one truck per year how much per month?", image: "sudanWaterTruck.png", options: ["100€", "200€", "300€", "500€"], timeout: 25, correct: 0 },
+    { loc: "Gaza", title: "Gaza - Food For A Day", detail: "1 full meal a day", question: "Find captial city?", options: ["New Delhi", "Gaza City", "Chennai", "Mumbai"], correct: 1 },
+    { loc: "Ukraine", title: "Ukraine - Humanitarian And Medical Aid", detail: "Join to make difference", question: "Find captial city?", options: ["New Delhi", "Bangalore", "Kviv", "Mumbai"], correct: 2 },
+    { loc: "Kenya", title: "Kenya - Drinking Water Plant", detail: "Clean driniking water", question: "Find captial city?", options: ["Nairobi", "Bangalore", "Chennai", "Mumbai"], correct: 0 },
+    { loc: "Bangladesh", title: "Bangladesh - Water Filter Plant", detail: "Help Bangladesh children", question: "Find captial city?", options: ["New Delhi", "Bangalore", "Chennai", "Dhaka"], correct: 3 },
+    { loc: "Afghanistan", title: "Afghanistan - Water Filter Plant", detail: "2.6 million registered Afghan refugees in the world.", question: "Find captial city?", options: ["New Delhi", "Kabul", "Chennai", "Mumbai"], correct: 1 },
+    { loc: "Pakistan", title: "Pakistan - Donate for children healthcare.", detail: "Provide education, healthcare, and protection to vulnerable children", question: "Find captial city?", options: ["New Delhi", "Bangalore", "Chennai", "Islamabad"], correct: 3 }
 ];
 
 function loadQuestion(city, index) {
