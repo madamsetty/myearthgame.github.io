@@ -1,4 +1,3 @@
-<!-- Page Title with Icon at the top left -->
 <link href='https://fonts.googleapis.com/css?family=Oswald' rel='stylesheet'>
 <style>
     .title-container {
@@ -34,7 +33,7 @@
         font-family: Oswald;
         font-weight: 1000;
         font-style: bold;
-        font-size: 35px;
+        font-size: 35px; /* Default font size for larger screens */
         color: #da291c;
     }
 
@@ -43,26 +42,81 @@
     }
 
     #header.fullscreen #title {
-        font-size: 6em;
+        font-size: 4.25em;
+        transform-origin: center;
     }
 
     @keyframes breathing {
         0% {
-            font-size: 6em;
+            font-size: 4.25em;
         }
         50% {
-            font-size: 6.3em;
+            font-size: 4em;
         }
         100% {
-            font-size: 6em;
+            font-size: 4.25em;
         }
     }
 
     .breathing {
       animation: breathing 8s infinite ease-in-out;
     }
+
+    /* Responsive Design with Dynamic Font Sizes for the Title */
+
+    /* For screens with max-width 1200px (desktops or larger tablets) */
+    @media (max-width: 1200px) {
+        #title {
+            font-size: 36px; /* Slightly smaller font size for large screens */
+        }
+    }
+
+    /* For screens with max-width 900px (large tablets and smaller desktops) */
+    @media (max-width: 900px) {
+        #title {
+            font-size: 28px; /* Smaller font size for large tablets */
+        }
+
+        .breathing {
+            animation: breathing 7s infinite ease-in-out; /* Slightly faster animation */
+        }
+    }
+
+    /* For screens with max-width 768px (tablets) */
+    @media (max-width: 768px) {
+        #title {
+            font-size: 28px; /* Smaller font size for tablets */
+        }
+
+        .breathing {
+            animation: breathing 6s infinite ease-in-out; /* Faster animation for smaller screens */
+        }
+    }
+
+    /* For screens with max-width 600px (small tablets / large phones) */
+    @media (max-width: 600px) {
+        #title {
+            font-size: 26px; /* Smaller font size for small tablets */
+        }
+
+        .breathing {
+            animation: breathing 5s infinite ease-in-out; /* Faster animation for smaller screens */
+        }
+    }
+
+    /* For screens with max-width 480px (phones) */
+    @media (max-width: 480px) {
+        #title {
+            font-size: 24px; /* Smaller font size for phones */
+            white-space: normal; /* Allow title to wrap on smaller screens */
+        }
+
+        .breathing {
+            animation: breathing 4s infinite ease-in-out; /* Even faster animation for phones */
+        }
+    }
 </style>
 
+    <img id="logo" src="img/save-the-children-with-name-logo.png" alt="Save the Children Logo" />
+    <h1 id="title" class="breathing">HOW MUCH COULD YOU HELP?</h1>
 
-<img id="logo" src="img/save-the-children-with-name-logo.png" alt="Save the Children Logo" />
-<h1 id="title">HOW MUCH COULD YOU HELP?</h1>

@@ -56,28 +56,36 @@ function showIdleScreen() {
     const header = document.getElementById('header');
     const logo = document.getElementById('logo');
     const title = document.getElementById('title');
-    
+
+    // Make the header fullscreen
     header.classList.add('fullscreen');
 
-  setTimeout(() => {
-    const headerRect = header.getBoundingClientRect();
-    const centerX = headerRect.width / 2;
-    const centerY = headerRect.height / 2;
-
-    const logoOffsetX = centerX - (logo.offsetLeft + logo.offsetWidth / 2);
-    const logoOffsetY = centerY + 50 - logo.offsetHeight - 10 - (logo.offsetTop + logo.offsetHeight / 2);
-
-    const titleOffsetX = centerX - (title.offsetLeft + title.offsetWidth / 2)+200;
-    const titleOffsetY = centerY + 100 - (title.offsetTop + title.offsetHeight / 2);
-
-    logo.style.transform = `translate(${logoOffsetX}px, ${logoOffsetY}px)`;
-    title.style.transform = `translate(${titleOffsetX}px, ${titleOffsetY}px)`;
-
-    // Start breathing animation after scale animation completes (delay of 0.8s)
+    // Delay to allow for smooth transition
     setTimeout(() => {
-      title.classList.add('breathing'); // Start breathing animation
-    }, 800); // After 0.8s to match the scale transition duration
-  }, 300); // Delay for smoother effect
+        // Get the dimensions and position of the header
+        const headerRect = header.getBoundingClientRect();
+        const centerX = headerRect.width / 2;
+        const centerY = headerRect.height / 2;
+
+        // Calculate the offset for the logo to center it
+        const logoRect = logo.getBoundingClientRect();
+        const logoOffsetX = centerX - (logoRect.left + logoRect.width / 2);
+        const logoOffsetY = centerY - (logoRect.top + logoRect.height / 2); // Adjusted Y offset for logo
+
+        // Calculate the offset for the title to center it
+        const titleRect = title.getBoundingClientRect();
+        const titleOffsetX = centerX - (titleRect.left + titleRect.width / 2) + 100; // Adjusted X offset for title
+        const titleOffsetY = centerY - (titleRect.top + titleRect.height / 2) + 100; // Adjusted Y offset for title
+
+        // Apply the calculated translation to the logo and title
+        logo.style.transform = `translate(${logoOffsetX}px, ${logoOffsetY}px)`;
+        title.style.transform = `translate(${titleOffsetX}px, ${titleOffsetY}px)`;
+
+        // Start the breathing animation for the title after 0.8s delay (to match scaling transition)
+        setTimeout(() => {
+            title.classList.add('breathing'); // Start breathing animation
+        }, 800); // After 0.8s delay for smooth transition
+    }, 300); // Initial delay for smoother effect when the fullscreen header is applied
 }
 
 function restoreToActiveScreen() {
