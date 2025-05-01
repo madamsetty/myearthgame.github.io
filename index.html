@@ -4,6 +4,11 @@
         <title>LiveRing Oy</title>
         <meta charset="utf-8">
         
+        <!-- Viewport for mobile -->
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        
         <link rel="stylesheet" href="css/styles.css">
 
         <script type="module" src="js/utils.js" defer></script>
@@ -18,7 +23,7 @@
         }
         </script>
         <script type="module">
-            import * as THREE from 'three';
+            import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.175.0/build/three.module.js';
             import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
             import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
             import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
