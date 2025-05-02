@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>LiveRing Oy</title>
+        <meta charset="utf-8">
+
+        <style>
+            html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+
+            /* Set the background image */
+            background-image: url('img/nightSkyDark.jpg');
+            background-size: cover; /* Make the background image cover the entire page */
+            background-position: center; /* Center the background image */
+            background-attachment: fixed; /* Fix the background during scroll */
+        }
+
+        /* Title with icon at the top left */
+        #pageTitle {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            align-items: center;
+            font-size: 24px; /* Set font size for title */
+            color: white; /* Set text color */
+            z-index: 2; /* Ensure title appears above other content */
+            font-size: 2.8rem;
+            font-weight: bold;
+            font-family: 'Brush Script MT', cursive;
+            color: white;
+            text-shadow: 0 0 5px black;
+            margin-left: 10px;
+        }
+
+        #pageTitle img {
+            width: 100px; /* Icon size */
+            height: 100px; /* Icon size */
+            margin-right: 15px; /* Space between icon and title */
+        }
+
+        /* Style for the icons at the bottom left */
+        #bottomLeftIcons {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            display: flex;
+            flex-direction: column;  /* Stack icons vertically */
+            gap: 10px;
+            z-index: 1;
+        }
+
+        .icon {
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+        }
+        </style>
+
+        <script src="https://cdn.jsdelivr.net/npm/three@0.136.0/build/three.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.136.0/examples/js/controls/OrbitControls.js"></script>
+        
+        <script type="module">
+            import * as THREE from 'three';
+            import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+            import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+            import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+            import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+            import { OutlinePass } from 'three/addons/postprocessing/OutlinePass.js';
+            import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+            var w=0;
+            
+            var bId=function(id){return document.getElementById(id);}
+            var ddedo=bId("dedo");
+
+            var mouse=new THREE.Vector2();
+            var raycaster=new THREE.Raycaster();
+            var alvos=[];
+            var isected,isects;
+            var scene,camera,renderer,controls,gradientSphere,globe,color,sub;
+            var composer,renderPass,outlinePass;
+            var selectedObjects=[];
+            var selectedObject;
+            var group=new THREE.Group();
+            var dummy=[];
+            var amb,textureLoader,textu,Earthmat,Earthgeo,icosaedron,markerInfo,gMarker,mMarker,markers;
+            
+            const gradientSphereRenderOrder = 1;
+            const globeSphereRenderOrder = 999;
+            const markersRenderOrder = 1000;
+
+            var sim = 0;
+            const markerCount = 0;
+            const sphereWidthHeightSegments = 64;
+            const sphereRadius = 4;
+            var spehereRotationSpeed = 2;
+            
+            const maxSceneZoomCloser = 12;
+            const maxSceneZoomFar = 25;
+            var currentCameraPositionZ = 0;
+            const activityFrameTransistionAnimationSpeed = 2;
+
+            // Set to true if icosaedron lines around object to be rendered.
+            // Consumes 100Mb run time memory. 
+            const showIcosaedron = false;
+            const showLatLngGrid = false;
+            
+            let rotateSphere = true;
+            let showActivityWindow = false;
+            
+            function isGroupInteractionEnabled(enabled) {
+                if(enabled)
+                    {
+                        group.userData.interactive = true;
+                    }
+                    else 
+                    {
+                        group.userData.interactive = false;
+                    }
+            }
+            
+            function init()
+            {
+                scene=new THREE.Scene();
+
+                camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,1,2000);
+                camera.position.set(0,0,maxSceneZoomCloser);
+
+                //const canvas = new THREE.
+                renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+                renderer.setPixelRatio(window.devicePixelRatio);
+                renderer.setSize(window.innerWidth,window.innerHeight);
+                renderer.setClearColor('#079',0);
+                //renderer.outputColorSpace=THREE.LinearSRGBColorSpace;
+
+                document.body.appendChild(renderer.domElement);
+                document.addEventListener('click', onMouse, false);
+                window.addEventListener("resize",onWindowResize);
+
+                // Set maximum zooming levels
+                controls = new OrbitControls(camera,renderer.domElement);
+                controls.minDistance = maxSceneZoomCloser;  // Minimum zoom in
+                controls.maxDistance = maxSceneZoomFar; // Maximum zoom out
+                
+                composer=new EffectComposer(renderer);
+                renderPass=new RenderPass(scene,camera );
+                composer.addPass(renderPass);
+                outlinePass=new OutlinePass(new THREE.Vector2(window.innerWidth,window.innerHeight),scene,camera);
+                composer.addPass(outlinePass);
+
+                outlinePass.edgeStrength = 3;
+                outlinePass.edgeGlow = 3;
+
+                amb=new THREE.AmbientLight("#fff",3);
+            	//scene.add(amb);
+
+                // Add gradient glow around sphere
+                const gradientMaterial = new THREE.ShaderMaterial({
+                  transparent: true,
+                  side: THREE.BackSide,
+                  depthWrite: false,
+                  blending: THREE.AdditiveBlending, // helps smooth out glow
+                  uniforms: {
+                    glowColor: { value: new THREE.Color(0xeeffff) },
+                    viewVector: { value: new THREE.Vector3(0, 0, 1) },
+                    intensity: { value: 0.5 },
+                    fadeStrength: { value: 7.0 }
+                  },
+                  vertexShader: `
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+                    void main() {
+                      vNormal = normalize(normalMatrix * normal);
+                      vPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;
+                      gl_Position = projectionMatrix * vec4(vPosition, 1.0);
+                    }
+                  `,
+                  fragmentShader: `
+                    uniform vec3 glowColor;
+                    uniform vec3 viewVector;
+                    uniform float intensity;
+                    uniform float fadeStrength;
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+                    void main() {
+                      float glow = dot(normalize(vNormal), normalize(viewVector));
+                      float opacity = pow(1.0 - glow, fadeStrength) * intensity;
+                      gl_FragColor = vec4(glowColor, opacity);
+                    }
+                  `
+                });
+
+                // Create a gradient sphere around the earth
+                gradientSphere = new THREE.Mesh(new THREE.SphereGeometry(sphereRadius * 1.05, sphereWidthHeightSegments, sphereWidthHeightSegments), gradientMaterial);
+                gradientSphere.rendereOrder = gradientSphereRenderOrder;
+                group.add(gradientSphere);
+                
+                // Load earth surface from map image file
+                textureLoader=new THREE.TextureLoader();
+                textu=new THREE.TextureLoader().load("img/worldMap5400x2700.jpeg");
+                //textu.outputColorSpace=THREE.SRGBColorSpace;
+                Earthmat=new THREE.MeshStandardMaterial({color:"#fff",map:textu,transparent:true,opacity:1});
+                Earthgeo=new THREE.SphereGeometry(sphereRadius,
+                                                  sphereWidthHeightSegments,
+                                                  sphereWidthHeightSegments);
+                globe=new THREE.Mesh(Earthgeo,Earthmat);
+                globe.rendereOrder = globeSphereRenderOrder;
+                group.add(globe);
+
+                // Render wire icosaedron face mesh around the shape
+                // Takes about 400-500Mb runtime memory
+                if(showIcosaedron)
+                {
+                    let icosaedronSphereRadius = sphereRadius + 0.1; // define this separately
+                    icosaedron = new THREE.Mesh(new THREE.IcosahedronGeometry(icosaedronSphereRadius,10),new THREE.MeshStandardMaterial({color:'#08b',wireframe:true}));
+                }
+                
+                // Add the graticule lines to the scene
+                if(showLatLngGrid)
+                {
+                    const gridLines = createLatLongLines(sphereRadius + 0.02, 18, 36);
+                    globe.add(gridLines);
+                    addLatLongLabels(sphereRadius + 0.5);
+                }
+
+                // Light
+                const light = new THREE.DirectionalLight(0xffffff, 2);
+                light.position.set(5, 5, 5);
+                scene.add(light);
+                
+                markerInfo=[];
+                gMarker=new THREE.SphereGeometry(0.15,sphereWidthHeightSegments);
+                mMarker=new THREE.MeshBasicMaterial({color: 0xcc00ff,});
+                mMarker.defines={ USE_UV: " " }; // needed to be set to be able to work with UVs
+                markers =new THREE.InstancedMesh(gMarker, mMarker, markerCount);
+
+                // Example: Add a marker at New York City (lat: 40.7128, lon: -74.0060)
+                addMarker(40.7128, -74.0060, "New York", sphereRadius, 0); // New York
+                addMarker(28.617177625664986, 77.20245884547343, "New Delhi", sphereRadius, 1); // New Delhi
+                
+                for (let i=0;i<markerCount;i++){
+                    var mat;
+                    var model;
+                    var mixer = null;
+                    var geo;
+                    const loader = new GLTFLoader();
+                    loader.load('img/mapPin.glb',
+                                    function (gltf) 
+                                    {   
+                                        model = gltf.scene;
+                                        gltf.scene.traverse( function( object ) 
+                                             {            
+                                               if ((object instanceof THREE.Mesh))
+                                                { 
+                                                    mat = object.material;
+                                                    geo = object.geometry;
+                                                    // Scale pin size and angle
+                                                    geo.scale(0.1, 0.1, 0.1);
+                                                    geo.rotateY(Math.PI / 2);
+                                                    geo.rotateX(Math.PI / 2.25);
+                                                    
+                                                    mat.map = object.texture;
+                                                    dummy[i] = new THREE.Mesh(geo, mat );
+                                                    dummy[i].position.randomDirection().setLength(sphereRadius);
+                                                    object.position.copy(position);
+                                                    dummy[i].updateMatrix();
+                                                    markers.setMatrixAt(i, dummy[i].matrix);
+                                                    dummy[i].name="Id: "+i;
+                                                    dummy[i].kx=position.clone().x;
+                                                    dummy[i].ky=position.y;
+                                                    dummy[i].kz=position.z;
+                                                    alvos.push(dummy[i]);
+                                                    globe.add(dummy[i]);
+                                                }
+                                            });
+                                    },
+                                    (xhr) => 
+                                    {
+                                        console.log((xhr.loaded / xhr.total * 100) + '% loaded')
+                                    },
+                                    (error) => 
+                                    {
+                                        console.log(error);
+                                    }
+                                );
+                    
+                    //const pinGeometry = new THREE.BoxGeometry( 0.2, 0.5, 0.2 );
+                    //const loader = new THREE.TextureLoader();
+                    //const pinMaterial = new THREE.MeshBasicMaterial({map: loader.load("img/mapPin.glb")});
+                    //dummy[i] = new THREE.Mesh(pinGeometry, pinMaterial );
+                    //dummy[i]=new THREE.Mesh(new THREE.SphereGeometry(0.1,
+                      //                                               sphereGeometryRadius,
+                        //                                             sphereGeometryRadius),
+                          //                                          new THREE.MeshLambertMaterial({color: 0xf83f20}));
+                    //dummy[i].name="Id: "+i;
+                    //dummy[i].kx=dummy[i].position.clone().x;
+                    //dummy[i].ky=dummy[i].position.y;
+                    //dummy[i].kz=dummy[i].position.z;
+                    //alvos.push(dummy[i]);
+                    //group.add(dummy[i]);
+                }
+            }
+
+            function onMouse(event){
+                //console.log("mouse event.");
+                ddedo.style.top=-20+event.clientY+"px";
+                ddedo.style.left=30+event.clientX+"px";
+                mouse.x=(event.clientX/window.innerWidth)*2-1;
+                mouse.y=-(event.clientY/window.innerHeight)*2+1;
+                mouse.z=0;
+                raycaster.setFromCamera(mouse,camera);
+                isects=raycaster.intersectObjects(alvos,false);
+                if(isects.length>0 && isects[0].object.kx ){
+                    // Stop rotation and animate first before showing frame
+                    rotateSphere = false;
+                    currentCameraPositionZ = camera.position.z;
+                    showActivityWindow = true;
+                    //isGroupInteractionEnabled(false);
+                    
+                    //console.log("intersect size is: ", isects.length );
+                    isected=isects[0].object;//dspanC.innerText=isected.name;
+                    ddedo.style.display="";
+                    ddedo.animate([{backgroundColor:'#fcc'},{backgroundColor:'#909'}],{duration: 250});
+                    ddedo.innerHTML="<table><tr><td colspan='2'>" + isected.name + "&nbsp;&nbsp;Mag: " + THREE.MathUtils.randInt(1, 10) + "</td></tr><tr><td style='text-align:left;'>X:</td><td style='text-align:right;'>" + Number(isected.kx).toFixed(2) + "</td></tr><tr><td style='text-align:left;'>Y:</td><td style='text-align:right;'>" + Number(isected.ky).toFixed(2) + "</td></tr><tr><td style='text-align:left;'>Z:</td><td style='text-align:right;'>" + Number(isected.kz).toFixed(2) + "</td></tr></table>";
+                    selectedObject=isects[0].object;
+                    addSelectedObject(selectedObject);
+                    outlinePass.selectedObjects=selectedObjects;
+                }else
+                {
+                    isected=null;
+                    ddedo.style.display="none";
+                    outlinePass.selectedObjects=false;
+                    
+                    //currentCameraPositionZ = 0;
+                    showActivityWindow = false;
+                    //isGroupInteractionEnabled(true);
+                    
+                    // Restart rotation
+                    rotateSphere = true;
+                }
+                console.log("camera.fov:", camera.fov);
+            }
+
+            function animate(){
+                requestAnimationFrame(animate);
+                if(rotateSphere)
+                {
+                    if(sim==0 && globe && Earthmat)
+                    {
+                        scene.add(group);
+                        scene.add(amb);
+                        sim=1;
+
+                        // Add icosaedron if was created earlier
+                        if(showIcosaedron && icosaedron)
+                        {
+                            globe.add(icosaedron);
+                        }
+                    }
+                    controls.update();
+                    group.rotation.y += spehereRotationSpeed/1000;
+                    w++;
+                    if(w==30)
+                    {
+                        outlinePass.visibleEdgeColor.set(get_random_color());
+                        w=0;
+                    }
+                    composer.render();
+                }
+                //console.log("Zoom distance:", camera.position.distanceTo(controls.target).toFixed(2), ", z: ", camera.position.z);
+            }
+            
+            function animateToActivityView()
+            {
+                requestAnimationFrame(animateToActivityView);
+                if(showActivityWindow)
+                {
+                    // Smoothly zoom out
+                    if (camera.position.z < maxSceneZoomFar)
+                    {
+                        camera.position.z += 0.4;
+                    }
+                    
+                    renderer.render(scene, camera);
+                    gradientSphere.rendereOrder = gradientSphereRenderOrder;
+                } else {                    
+                    // Smoothly zoom in
+                    if (camera.position.z > currentCameraPositionZ)
+                    {
+                        camera.position.z -= 0.4;
+                    }
+
+                    renderer.render(scene, camera);
+                    gradientSphere.rendereOrder = gradientSphereRenderOrder;
+                    console.log("camera.position.z:", camera.position.z, " > currentCameraPositionZ:", currentCameraPositionZ);
+                }
+                
+                //console.log("Animated scene current zoom posZ:", currentCameraPositionZ, " maxSceneZoomFar: ", maxSceneZoomFar, " camera.pos.z:", camera.position.z);
+                console.log("Animated scene current zoom posZ:", currentCameraPositionZ, " camera.pos.z:", camera.position.z);
+            }
+
+            function get_random_color(){
+                color="";
+                for(let i=0;i<3;i++){
+                        sub=Math.floor(Math.random()*(256-64)+64).toString(16);
+                        color +=(sub.length==1?"0"+sub:sub);
+                    }
+                    return "#"+color;
+            }
+
+            function onWindowResize() {
+                camera.aspect = innerWidth / innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(innerWidth, innerHeight);
+            }
+
+            function addSelectedObject(object){
+                selectedObjects=[];
+                selectedObjects.push(object);
+            }
+            
+            function latLonToVector3(lat, lon, radius) {
+              const phi = (90 - lat) * (Math.PI / 180); // latitude -> polar angle
+              const theta = (lon + 180) * (Math.PI / 180); // longitude -> azimuthal angle
+
+              const x = -radius * Math.sin(phi) * Math.cos(theta);
+              const z = radius * Math.sin(phi) * Math.sin(theta);
+              const y = radius * Math.cos(phi);
+
+              return new THREE.Vector3(x, y, z);
+            }
+
+            // Function to generate latitude and longitude lines
+            function createLatLongLines(radius, latSteps = 10, lonSteps = 20) {
+              const positions = [];
+
+              // Latitude lines (horizontal)
+              for (let i = 1; i < latSteps; i++) {
+                const lat = (i / latSteps) * Math.PI; // from 0 to PI
+                for (let j = 0; j <= lonSteps; j++) {
+                  const lon1 = (j / lonSteps) * 2 * Math.PI;
+                  const lon2 = ((j + 1) / lonSteps) * 2 * Math.PI;
+
+                  const x1 = radius * Math.sin(lat) * Math.cos(lon1);
+                  const y1 = radius * Math.cos(lat);
+                  const z1 = radius * Math.sin(lat) * Math.sin(lon1);
+
+                  const x2 = radius * Math.sin(lat) * Math.cos(lon2);
+                  const y2 = radius * Math.cos(lat);
+                  const z2 = radius * Math.sin(lat) * Math.sin(lon2);
+
+                  positions.push(x1, y1, z1, x2, y2, z2);
+                }
+              }
+
+              // Longitude lines (vertical)
+              for (let i = 0; i < lonSteps; i++) {
+                const lon = (i / lonSteps) * 2 * Math.PI;
+                for (let j = 0; j < latSteps; j++) {
+                  const lat1 = (j / latSteps) * Math.PI;
+                  const lat2 = ((j + 1) / latSteps) * Math.PI;
+
+                  const x1 = radius * Math.sin(lat1) * Math.cos(lon);
+                  const y1 = radius * Math.cos(lat1);
+                  const z1 = radius * Math.sin(lat1) * Math.sin(lon);
+
+                  const x2 = radius * Math.sin(lat2) * Math.cos(lon);
+                  const y2 = radius * Math.cos(lat2);
+                  const z2 = radius * Math.sin(lat2) * Math.sin(lon);
+
+                  positions.push(x1, y1, z1, x2, y2, z2);
+                }
+              }
+
+              const geometry = new THREE.BufferGeometry();
+              geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+              const material = new THREE.LineBasicMaterial({ color: 0xffffff });
+              const lines = new THREE.LineSegments(geometry, material);
+              return lines;
+            }
+            
+            // 🔤 Function to create text as a sprite
+            function makeTextSprite(message, parameters = {}) {
+              const fontface = parameters.fontface || 'Arial';
+              const fontsize = parameters.fontsize || 32;
+              const canvas = document.getElementById('canvas');
+              const context = canvas.getContext('2d');
+              context.font = `${fontsize}px ${fontface}`;
+              context.fillStyle = parameters.fillStyle || 'white';
+              context.fillText(message + " " + parameters.latLng, 0, fontsize);
+
+              const texture = new THREE.CanvasTexture(canvas);
+              const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+              const sprite = new THREE.Sprite(material);
+              sprite.scale.set(1.5, 0.75, 1);
+              return sprite;
+            }
+
+            // 📍 Add latitude/longitude labels
+            function addLatLongLabels(radius) {
+              const latLabels = [ -60, -30, 0, 30, 60 ];
+              const lonLabels = [ -120, -60, 0, 60, 120 ];
+
+              for (let lat of latLabels) {
+                const sprite = makeTextSprite(`${lat}°`, { fontsize: 40, latLng: "lat" });
+                const phi = (90 - lat) * (Math.PI / 180);
+                const theta = 0; // longitude = 0 for lat labels
+                const x = radius * Math.sin(phi) * Math.cos(theta);
+                const y = radius * Math.cos(phi);
+                const z = radius * Math.sin(phi) * Math.sin(theta);
+                sprite.position.set(x, y, z);
+                group.add(sprite);
+              }
+
+              for (let lon of lonLabels) {
+                const sprite = makeTextSprite(`${lon}°`, { fontsize: 40, latLng: "lng" });
+                const phi = Math.PI / 2; // latitude = 0 for lon labels
+                const theta = (lon + 180) * (Math.PI / 180);
+                const x = radius * Math.sin(phi) * Math.cos(theta);
+                const y = radius * Math.cos(phi);
+                const z = radius * Math.sin(phi) * Math.sin(theta);
+                sprite.position.set(x, y, z);
+                group.add(sprite);
+              }
+            }
+            
+            // 🗽 Add markers
+            function addMarker(lat, lon, name, radius, index) 
+            {
+                // Add marker slightly above surface
+                const position = latLonToVector3(lat, lon, radius + 0.05);
+            
+                // Sphere marker
+                const markerGeometry = new THREE.SphereGeometry(0.1, 16, 16);
+                
+                // Pin (cone)
+                //const markerGeometry = new THREE.ConeGeometry(0.10, 0.35, 16);
+                
+                const markerMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+                
+                dummy[index] = new THREE.Mesh(markerGeometry, markerMaterial);
+                
+                // Rotate the cone so it points outward
+                // Convert lat/lon to Cartesian position
+                const phi = (90 - lat) * (Math.PI / 180);
+                const theta = (lon + 180) * (Math.PI / 180);
+                const x = radius * Math.sin(phi) * Math.cos(theta);
+                const y = radius * Math.cos(phi);
+                const z = radius * Math.sin(phi) * Math.sin(theta);
+
+                // Position cone tip slightly above the surface
+                const normal = new THREE.Vector3(x, y, z).normalize(); // surface normal
+                const axis = new THREE.Vector3(0, -1, 0); // cone's default direction
+                
+                // Move cone so that its tip touches the surface (base sticks out)
+                const tipPosition = normal.clone().multiplyScalar(radius); // tip on surface
+                dummy[index].position.copy(tipPosition);
+                dummy[index].quaternion.setFromUnitVectors(axis, normal);
+                
+                dummy[index].position.copy(position);
+                dummy[index].updateMatrix();
+                markers.setMatrixAt(0, dummy[index].matrix);
+                dummy[index].name="Id: "+index;
+                dummy[index].name = `Id: ${index}, Name: ${name}`;
+                dummy[index].kx=dummy[index].position.clone().x;
+                dummy[index].ky=dummy[index].position.y;
+                dummy[index].kz=dummy[index].position.z;
+                alvos.push(dummy[index]);
+                
+                dummy[index].rendereOrder = markersRenderOrder;
+                globe.add(dummy[index]);
+            }
+            
+            init();
+            animate();
+            //animateToActivityView();
+        </script>
+    </head>
+
+    <body>
+        <div id="dedo" style="position:absolute;left:10px;top:10px;padding:4px;color:#fff;background-color:#000;border:2px outset #cc6;display:none;">?</div>
+        
+        

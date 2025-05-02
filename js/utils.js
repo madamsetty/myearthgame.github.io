@@ -103,9 +103,15 @@ function restoreToActiveScreen() {
     }, 300);
 }
 
+function getImageUrl(name) {
+  // note that this does not include files in subdirectories
+  return new URL(`./dir/${name}.png`, import.meta.url).href
+}
+
 // Make globally accessible
 window.loadHTML = loadHTML;
 window.loadFooter = loadFooter;
 window.loadSVGMarker = loadSVGMarker;
 window.showIdleScreen = showIdleScreen;
 window.restoreToActiveScreen = restoreToActiveScreen;
+window.getImageUrl = getImageUrl;

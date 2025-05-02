@@ -14,23 +14,14 @@
         <script type="module" src="js/utils.js" defer></script>
         <script type="module" src="js/quiz.js" defer></script>
         
-        <script type="importmap">
-        {
-            "imports": {
-                "three": "https://cdn.jsdelivr.net/npm/three@0.175.0/build/three.module.js",
-                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/"
-              }
-        }
-        </script>
         <script type="module">
-            import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.175.0/build/three.module.js';
-            import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/controls/OrbitControls.js';
-            import { EffectComposer } from 'https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/postprocessing/EffectComposer.js';
-            import { RenderPass } from 'https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/postprocessing/RenderPass.js';
-            import { ShaderPass } from 'https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/postprocessing/ShaderPass.js';
-            import { OutlinePass } from 'https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/postprocessing/OutlinePass.js';
-            import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/loaders/GLTFLoader.js';
-            import { TextureLoader } from 'https://cdn.jsdelivr.net/npm/three@0.175.0/build/three.module.js';
+            import * as THREE from 'three';
+            import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+            import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+            import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+            import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
+            import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+            import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
             
             import { showQuiz } from './js/quiz.js';
 
@@ -184,7 +175,7 @@
                 group.add(gradientSphere);
 
                 textureLoader=new THREE.TextureLoader();
-                textu=new THREE.TextureLoader().load("img/worldMapBlue5400x2700.jpeg");
+                textu=new THREE.TextureLoader().load('img/worldMapBlue5400x2700.jpeg');
                 Earthmat=new THREE.MeshStandardMaterial({color:"#fff",map:textu,transparent:true,opacity:1});
                 Earthgeo=new THREE.SphereGeometry(sphereRadius,
                                                   sphereWidthHeightSegments,

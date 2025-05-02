@@ -115,6 +115,40 @@
             animation: breathing 4s infinite ease-in-out; /* Even faster animation for phones */
         }
     }
+    
+    /* Additional responsiveness for very small devices (like iPhone SE) */
+    @media screen and (max-width: 395px) {
+        #title {
+            font-size: 13px; /* Smaller font size for phones */
+            white-space: normal; /* Allow title to wrap on smaller screens */
+            margin: 12px 5px 5px 5px;
+        }
+        
+        #logo {
+            height: 42px;
+        }
+        
+        .breathing {
+            animation: breathing 4s infinite ease-in-out; /* Even faster animation for phones */
+        }
+        
+        #header.fullscreen #title {
+            font-size: 3.25em;
+            transform-origin: center;
+        }
+
+        @keyframes breathing {
+            0% {
+                font-size: 3.25em;
+            }
+            50% {
+                font-size: 3em;
+            }
+            100% {
+                font-size: 3.25em;
+            }
+        }
+    }   
 </style>
 
     <img id="logo" src="img/save-the-children-with-name-logo.png" alt="Save the Children Logo" />
