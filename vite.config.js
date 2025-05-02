@@ -11,5 +11,6 @@ module.exports = defineConfig({
         quizScreen: './comp/quiz-screen.html'
       }
     }
-  }
+  },
+base: '/myearthgame.github.io/'
 })

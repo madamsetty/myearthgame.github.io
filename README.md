@@ -4,10 +4,11 @@
 3. Restart nginx server
 4. Access web app at http://localhost:8080
 
-# Install vite, npm on mac
+# Install vite, npm, gh-pages on mac
 1. Goto webapp's root folder
     npm install --save three
     npm install --save-dev vite
+    npm install gh-pages --save-dev (for publishing to github pages)
 2. Run "npx vite --host" to start server on localhost:5173 on original code
 
 # Make changes in repo
@@ -25,7 +26,9 @@
 
 # Commit code to repo
 1. Commit all files and changes including dist folder
-2. Run github pages on dist folder
+2. Publish to git hub pages with command "npm run deploy"
+3. Make sure github pages are deploymed from gh-pages branch
+    Go to github.com repository->settings->pages->Build and Deployment->Branch 
 
 # Repository info
 All files are located in repository root for bitbucked to server web pages at url http://myearthgame.bitbucket.io

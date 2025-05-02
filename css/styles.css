@@ -4,7 +4,7 @@ html, body {
     height: 100%;
     overflow: hidden;
 
-    background-image: url('../img/whiteCloudBackground.png');
+    background-image: url('../public/img/whiteCloudBackground.png');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -42,7 +42,7 @@ html, body {
     margin: 0;
     border-radius: 10px;
     opacity: 0.925;
-    background: url('../img/whiteCloudBackground.png') center center / cover no-repeat;
+    background: url('../public/img/whiteCloudBackground.png') center center / cover no-repeat;
     border: 1px solid gray;
     z-index: 2000;
 }
