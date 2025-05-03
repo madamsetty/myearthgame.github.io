@@ -335,12 +335,16 @@
                     }
                     controls.update();
                     
+                    if (sphereRotationSpeed <= constantSphereRotationSpeed) {
+                        sphereRotationSpeed = constantSphereRotationSpeed;
+                    }
+                    
                     group.rotation.y += sphereRotationSpeed * deltaFromLastFrame;
                     
                     if (slowingDown) {
-                        sphereRotationSpeed -= (1+(sphereRotationSpeed*0.0001)); // slow it down gently
+                        sphereRotationSpeed -= (1+(sphereRotationSpeed*0.00005)); // slow it down gently
                         if (sphereRotationSpeed <= constantSphereRotationSpeed) {
-                            sphereRotationSpeed = constantSphereRotationSpeed;
+                            sphereRotationSpeed = constantSphereRotationSpeed;                          
                             slowingDown = false;
                         }
                     }
