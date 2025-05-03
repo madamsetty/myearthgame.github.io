@@ -22,14 +22,12 @@
         margin: 0px 5px 5px 5px;
         top: 0px;
         left: 5px;
-        opacity: 1;
     }
 
     #title {
         top: 0px;
         margin: 10px 5px 5px 5px;
         right: 5px;
-        opacity: 1;
         transform: none;
         font-family: Oswald;
         font-weight: 1000;
@@ -51,6 +49,7 @@
 
     #header.fullscreen #title {
         font-size: 4.25em;
+        z-index: 1001;
     }
 
     #header.fullscreen #touchSwipeHint {
@@ -86,14 +85,14 @@
     }
 
     .breathing {
-      animation: breathing 8s infinite ease-in-out;
+      animation: breathing 12s infinite ease-in-out;
     }
 
     /* Responsive Design with Dynamic Font Sizes */
     /* For screens with max-width 1200px (desktops or larger tablets) */
     @media (max-width: 1200px) {
         #title {
-            font-size: 36px; /* Slightly smaller font size for large screens */
+            font-size: 36px; /* Slightly smaller font size for large screens */ 
         }
     }
 
@@ -177,10 +176,10 @@
     }   
 </style>
 
-    <img id="logo" src="img/save-the-children-with-name-logo.png" alt="Save the Children Logo" />
-    <h1 id="title" class="breathing">HOW MUCH COULD YOU HELP?</h1>
-    <div id="touchSwipeHint" class="touch-screen-hint">
-        <img id="touchIcon" src="img/touchIcon.png" alt="Touch screen to play" />
-        <span>Swipe to take the challenge</span>
-    </div>
+<img id="logo" src="img/save-the-children-with-name-logo.png" alt="Save the Children Logo" />
+<h1 id="title" class="breathing">HOW MUCH COULD YOU HELP?</h1>
+<div id="touchSwipeHint" class="touch-screen-hint">
+    <img id="touchIcon" src="img/touchIcon.png" alt="Touch screen to play" />
+    <span>Swipe to take the challenge</span>
+</div>
 
