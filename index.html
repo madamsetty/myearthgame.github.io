@@ -59,8 +59,9 @@
             let lastFrameTime = 0;
             let deltaFromLastFrame = 0;
             let swipeActionDuration = 0;
-            let swipeDistanceThreshhold = 200;
-            let swipeActionDurationThreshholdMs = 150;
+            const swipeDistanceThreshhold = 200;
+            const swipeActionDurationThreshholdMs = 150;
+            const typicalClickDurationMs = 100; 
             
             // Swipe on sphere
             let isSwiping = false;
@@ -254,6 +255,7 @@
 
                                 showActivityWindow = false;
                                 rotateSphere = true;
+                                isSwiping = false;
                         });
                     });
                     
@@ -304,11 +306,15 @@
 
             function onSwipeEnd(event) {
                 swipeActionDuration = new Date().getTime() - swipeActionDuration;
-                if(swipeDistance > swipeDistanceThreshhold && swipeActionDuration.toFixed(2) < swipeActionDurationThreshholdMs)
+                if(isSwiping && swipeDistance > swipeDistanceThreshhold 
+                   && swipeActionDuration.toFixed(2) < swipeActionDurationThreshholdMs && swipeActionDuration.toFixed(2) > typicalClickDurationMs)
                 {
                     sphereRotationSpeed = swipeDistance / 5;
                     isSwiping = false;
                     slowingDown = true;  // Start slowing down rotation after the swipe
+                }
+                else {
+                    sphereRotationSpeed = constantSphereRotationSpeed;
                 }
             }
             
