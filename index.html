@@ -38,7 +38,7 @@
             var dummy=[];
             var group=new THREE.Group();
             var sim = 0;
-            let screenInActivityTimeoutSecs = 120;
+            let screenInActivityTimeoutSecs = 60;
 
             const maxSceneZoomCloser = 14;
             const maxSceneZoomFar = 25;
@@ -54,8 +54,10 @@
             const sphereRadius = 4;
             
             const kickoffSpherePullSpeed = 20;
-            let constantSphereRotationSpeed = 1;
+            let constantSphereRotationSpeed = 0.5;
             var sphereRotationSpeed = constantSphereRotationSpeed;
+            let lastFrameTime = 0;
+            let deltaFromLastFrame = 0;
             
             // Swipe on sphere
             let isSwiping = false;
@@ -268,7 +270,6 @@
                 }
                 else
                 {
-
                     isSwiping = true;
                     // Track the initial mouse position
                     if (event.touches) {
@@ -292,7 +293,7 @@
 
                     // Use the swipe distance to control sphere rotation speed
                     if (Math.abs(swipeDistance) > swipeThreshold) {
-                        sphereRotationSpeed = swipeDistance * 0.002; // adjust rotation sensitivity (scale by 0.002)
+                        sphereRotationSpeed = swipeDistance * 0.01; // adjust rotation sensitivity (scale by 0.002)
                     }
                 }
             }
@@ -303,8 +304,13 @@
                 slowingDown = true;  // Start slowing down rotation after the swipe
             }
             
-            function animate(){
+            function animate(time){
                 requestAnimationFrame(animate);
+                
+                // Calculate delta time to ensure frame rate independence
+                deltaFromLastFrame = (time - lastFrameTime) / 5000;  // Time in seconds
+                lastFrameTime = time;
+                
                 if(rotateSphere || slowingDown)
                 {
                     if(sim==0 && globe && Earthmat)
@@ -320,10 +326,11 @@
                         }
                     }
                     controls.update();
-                    group.rotation.y += sphereRotationSpeed/1000;
+                    
+                    group.rotation.y += sphereRotationSpeed * deltaFromLastFrame;
                     
                     if (slowingDown) {
-                        sphereRotationSpeed -= (1+(sphereRotationSpeed*0.0005)); // slow it down gently
+                        sphereRotationSpeed -= (1+(sphereRotationSpeed*0.0001)); // slow it down gently
                         if (sphereRotationSpeed <= constantSphereRotationSpeed) {
                             sphereRotationSpeed = constantSphereRotationSpeed;
                             slowingDown = false;
@@ -541,7 +548,7 @@
             }
             
             init();
-            animate();
+            requestAnimationFrame(animate);
             
             function addQuizQuestion(questionText, options, correctAnswerIndex) {
                 const container = document.getElementById('quiz-container');
