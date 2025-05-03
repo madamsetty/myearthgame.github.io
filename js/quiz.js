@@ -74,8 +74,8 @@ function loadQuestion(city, index) {
         const tr = document.createElement("tr");
 
         const tdText = document.createElement("td");
-        tdText.textContent = opt;
-        tdText.className = "option-text-cell";
+        //tdText.textContent = opt;
+        //tdText.className = "option-text-cell";
 
         const tdBtn = document.createElement("td");
         tdBtn.className = "option-btn-cell";
@@ -85,8 +85,13 @@ function loadQuestion(city, index) {
         radio.name = "gameOptions";
         radio.value = i;
         if (userAnswers[index] === i) radio.checked = true;
+        
+        const lbl = document.createElement("label");
+        lbl.textContent = opt;
+        lbl.classList.add("option-text-cell");
+        lbl.appendChild(radio);
 
-        tdBtn.appendChild(radio);
+        tdBtn.appendChild(lbl);
         tr.appendChild(tdText);
         tr.appendChild(tdBtn);
         table.appendChild(tr);
