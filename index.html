@@ -40,11 +40,6 @@
             var sim = 0;
             let screenInActivityTimeoutSecs = 60;
 
-            const maxSceneZoomCloser = 14;
-            const maxSceneZoomFar = 25;
-            var currentCameraPositionZ = 0;
-            const activityFrameTransistionAnimationSpeed = 2;
-            
             const markersRenderOrder = 1000;
             const rendererSphereMargin = 0;
             const shrinkSphereHeight = 0;
@@ -53,11 +48,19 @@
             const sphereWidthHeightSegments = 64;
             const sphereRadius = 4;
             
+            const maxSceneZoomCloser = 14;
+            const maxSceneZoomFar = 25;
+            var currentCameraPositionZ = 0;
+            const activityFrameTransistionAnimationSpeed = 2;
+            
             const kickoffSpherePullSpeed = 20;
-            let constantSphereRotationSpeed = 0.5;
+            let constantSphereRotationSpeed = 0.25;
             var sphereRotationSpeed = constantSphereRotationSpeed;
             let lastFrameTime = 0;
             let deltaFromLastFrame = 0;
+            let swipeActionDuration = 0;
+            let swipeDistanceThreshhold = 200;
+            let swipeActionDurationThreshholdMs = 150;
             
             // Swipe on sphere
             let isSwiping = false;
@@ -270,6 +273,7 @@
                 }
                 else
                 {
+                    swipeActionDuration = new Date().getTime();
                     isSwiping = true;
                     // Track the initial mouse position
                     if (event.touches) {
@@ -288,20 +292,24 @@
                         swipeEndX = event.clientX;
                     }
 
-                    // Calculate swipe distance
+                    // Calculate swipe distance and duration
                     swipeDistance = swipeEndX - swipeStartX;
 
                     // Use the swipe distance to control sphere rotation speed
                     if (Math.abs(swipeDistance) > swipeThreshold) {
-                        sphereRotationSpeed = swipeDistance * 0.01; // adjust rotation sensitivity (scale by 0.002)
+                        sphereRotationSpeed = swipeDistance * 0.001; // adjust rotation sensitivity (scale by 0.002)
                     }
                 }
             }
 
             function onSwipeEnd(event) {
-                sphereRotationSpeed = swipeDistance / 5;
-                isSwiping = false;
-                slowingDown = true;  // Start slowing down rotation after the swipe
+                swipeActionDuration = new Date().getTime() - swipeActionDuration;
+                if(swipeDistance > swipeDistanceThreshhold && swipeActionDuration.toFixed(2) < swipeActionDurationThreshholdMs)
+                {
+                    sphereRotationSpeed = swipeDistance / 5;
+                    isSwiping = false;
+                    slowingDown = true;  // Start slowing down rotation after the swipe
+                }
             }
             
             function animate(time){
