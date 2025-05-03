@@ -80,17 +80,39 @@
     }
 
     td {
-        padding: 12px;
+        padding: 5px;
         vertical-align: middle;
+        display: flex;
+        justify-content: center;
     }
 
     .option-text-cell {
-        width: 20%;
+        width: 50%;
         font-size: 22px;
         font-family: Oswald;
         font-weight: bold;
+        text-align: center;
+        padding: 10px 20px;
+        border: 1px solid white;
+        border-radius: 10px;
+        cursor: pointer;
+        color: white;
+        background-color: red;
+        transition: 0.3s;
     }
 
+    .option-text-cell label {
+        align-content: center;
+    }
+    
+    .option-text-cell:has(input[type="radio"]:checked) {
+        background-color: green;
+    }
+
+    label:hover {
+      background-color: green;
+    }
+    
     .option-btn-cell {
         width: 80%;
     }
@@ -98,6 +120,8 @@
     input[type="radio"] {
         transform: scale(3);
         cursor: pointer;
+        width: 80%;
+        display: none;
     }
 
     .score-progress-container {
@@ -114,7 +138,7 @@
     }
     
     .game-buttons {
-        display: flex;
+        display: none;
         align-items: center;
         justify-content: center;
         width: 100%;
