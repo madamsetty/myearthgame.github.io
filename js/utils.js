@@ -74,7 +74,7 @@ function showIdleScreen() {
 
         // Calculate the offset for the title to center it
         const titleRect = title.getBoundingClientRect();
-        const titleOffsetX = centerX - (titleRect.left + titleRect.width / 2) + 100; // Adjusted X offset for title
+        const titleOffsetX = centerX - (titleRect.left + titleRect.width / 2) + 75; // Adjusted X offset for title
         const titleOffsetY = centerY - (titleRect.top + titleRect.height / 2) + 100; // Adjusted Y offset for title
 
         // Apply the calculated translation to the logo and title
