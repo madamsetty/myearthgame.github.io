@@ -12,5 +12,8 @@ module.exports = defineConfig({
       }
     }
   },
-base: '/myearthgame.github.io/'
+  watch: {
+      usePolling: true
+  },
+  base: '/myearthgame.github.io/'
 })
