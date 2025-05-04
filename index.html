@@ -554,7 +554,7 @@
                 
                 dummy[index].position.copy(position);
                 dummy[index].updateMatrix();
-                markers.setMatrixAt(0, dummy[index].matrix);
+                markers.setMatrixAt(index, dummy[index].matrix);
                 dummy[index].name = `Name: ${name}`;
                 dummy[index].kx=dummy[index].position.clone().x;
                 dummy[index].ky=dummy[index].position.y;
