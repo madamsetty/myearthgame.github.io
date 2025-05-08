@@ -22,6 +22,8 @@
             import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
             import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
             import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+            import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
+            import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
             
             import { showQuiz } from './js/quiz.js';
 
@@ -226,6 +228,7 @@
                 addMarker(33.89401745043521, 64.7245127621119, "Afghanistan", sphereRadius, 1);
                 addMarker(23.756642724639264, -102.58269351651069, "Mexico", sphereRadius, 1);
                 
+                drawCountryBorders(group, "./js/custom.geo.json", sphereRadius-0.25, "0xffffff", "./js//helvetiker_regular.typeface.json");
             }
 
             function onMouse(event){
@@ -469,50 +472,139 @@
             
             // Function to create text as a sprite
             function makeTextSprite(message, parameters = {}) {
-              const fontface = parameters.fontface || 'Arial';
-              const fontsize = parameters.fontsize || 32;
-              canvas = document.getElementById('canvas');
-              const context = canvas.getContext('2d');
-              context.font = `${fontsize}px ${fontface}`;
-              context.fillStyle = parameters.fillStyle || 'white';
-              context.fillText(message + " " + parameters.latLng, 0, fontsize);
+    const fontface = parameters.fontface || 'Arial';
+    const fontsize = parameters.fontsize || 32;
 
-              const texture = new THREE.CanvasTexture(canvas);
-              const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
-              const sprite = new THREE.Sprite(material);
-              sprite.scale.set(1.5, 0.75, 1);
-              return sprite;
-            }
+    // Set canvas size
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 256;
+    const context = canvas.getContext('2d');
 
-            function addLatLongLabels(radius) {
-              const latLabels = [ -60, -30, 0, 30, 60 ];
-              const lonLabels = [ -120, -60, 0, 60, 120 ];
+    // Optional background for visibility
+    // context.fillStyle = 'rgba(0, 0, 0, 0.4)';
+    // context.fillRect(0, 0, canvas.width, canvas.height);
 
-              for (let lat of latLabels) {
-                const sprite = makeTextSprite(`${lat}°`, { fontsize: 40, latLng: "lat" });
-                const phi = (90 - lat) * (Math.PI / 180);
-                const theta = 0; // longitude = 0 for lat labels
-                const x = radius * Math.sin(phi) * Math.cos(theta);
-                const y = radius * Math.cos(phi);
-                const z = radius * Math.sin(phi) * Math.sin(theta);
-                sprite.position.set(x, y, z);
-                group.add(sprite);
-              }
+    context.font = `Bold ${fontsize}px ${fontface}`;
+    context.fillStyle = parameters.fillStyle || 'white';
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
 
-              for (let lon of lonLabels) {
-                const sprite = makeTextSprite(`${lon}°`, { fontsize: 40, latLng: "lng" });
-                const phi = Math.PI / 2; // latitude = 0 for lon labels
-                const theta = (lon + 180) * (Math.PI / 180);
-                const x = radius * Math.sin(phi) * Math.cos(theta);
-                const y = radius * Math.cos(phi);
-                const z = radius * Math.sin(phi) * Math.sin(theta);
-                sprite.position.set(x, y, z);
-                group.add(sprite);
-              }
-            }
+    const label = parameters.latLng
+        ? `${message} ${parameters.latLng}`
+        : message;
+
+    context.fillText(label, canvas.width / 2, canvas.height / 2);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+
+    const material = new THREE.SpriteMaterial({
+        map: texture,
+        transparent: true,
+        depthWrite: false,
+        depthTest: true
+    });
+
+    const sprite = new THREE.Sprite(material);
+    sprite.scale.set(2.5, 1.25, 1); // Adjust size based on radius
+
+    sprite.frustumCulled = false; // Prevent disappearing near camera
+
+    return sprite;
+}
+
             
-            function addMarker(lat, lon, name, radius, index) 
-            {
+            async function drawCountryBorders(group, geoJsonUrl, radius, clr, fontUrl) {
+                const response = await fetch(geoJsonUrl);
+                const data = await response.json();
+
+                const loader = new FontLoader();
+                const font = await new Promise(resolve => loader.load(fontUrl, resolve));
+                const material = new THREE.LineBasicMaterial({ color: 0xffffff });
+
+                data.features.forEach(feature => {
+                    const geometry = new THREE.BufferGeometry();
+                    const points = [];
+
+                    const coords = feature.geometry.coordinates;
+                    const type = feature.geometry.type;
+
+                    const addCoords = coordSet => {
+                        coordSet.forEach(([lng, lat]) => {
+                            points.push(latLonToVector3(lat, lng, radius+0.25));    
+                        });
+                    };
+
+                    let labelCoords;
+                    let centroid;
+
+                    if (type === "Polygon") {
+                        addCoords(coords[0]);
+                        labelCoords = coords[0];
+                        centroid = getAverageCenter(coords);
+                    } else if (type === "MultiPolygon") {
+                        coords.forEach(polygon => addCoords(polygon[0]));
+                        labelCoords = coords[0][0];
+                        centroid = getAverageCenter(coords);
+                    }
+
+                    if (points.length > 1) {
+                        geometry.setFromPoints(points);
+                        const line = new THREE.Line(geometry, material);
+                        group.add(line);
+                    }
+                    
+                    if (centroid) {
+                        const [lon, lat] = centroid;
+                        const pos = latLonToVector3(lat, lon, radius+0.30);
+
+                        const sprite = makeTextSprite(feature.properties.name, {fontsize: 20});
+                        sprite.position.copy(pos);
+                        group.add(sprite);
+                    }
+                    
+                    console.log("name", feature.properties.name );
+                });
+            }
+function getAverageCenter(coords) {
+    const points = coords[0]; // outer ring
+    let x = 0;
+    let y = 0;
+
+    for (let i = 0; i < points.length; i++) {
+        x += points[i][0]; // longitude
+        y += points[i][1]; // latitude
+    }
+
+    x /= points.length;
+    y /= points.length;
+
+    return [x, y]; // [lon, lat]
+}
+            
+            function getCentroid(coords) {
+              let latSum = 0, lngSum = 0;
+              coords.forEach(([lng, lat]) => {
+                latSum += lat;
+                lngSum += lng;
+              });
+              return [latSum / coords.length, lngSum / coords.length];
+            }
+
+            function estimateSize(coords) {
+              let maxDist = 0;
+              const [centerLat, centerLng] = getCentroid(coords);
+              coords.forEach(([lng, lat]) => {
+                const dLat = lat - centerLat;
+                const dLng = lng - centerLng;
+                const dist = Math.sqrt(dLat * dLat + dLng * dLng);
+                if (dist > maxDist) maxDist = dist;
+              });
+              return maxDist;
+            }
+
+            function addMarker(lat, lon, name, radius, index) {
                 const position = latLonToVector3(lat, lon, radius + 0.05);
                 const markerRotateX = 90;
                 const markerRotateY = 180;
