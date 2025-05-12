@@ -29,7 +29,7 @@
         left: 0px;
         border-radius: 8px;
         background-size: cover;
-        font-family: Oswald;
+        font-family: 'lato';
         font-size: 28px;
         animation: fadeSlideIn 0.5s ease;
         height: 60%;
@@ -41,7 +41,7 @@
     }
 
     .game-question-content {
-        font-family: Oswald;
+        font-family: 'lato';
         font-size: 30px;
         animation: fadeSlideIn 0.5s ease;
         height: auto;
@@ -88,9 +88,9 @@
 
     .option-text-cell {
         width: 50%;
-        font-size: 22px;
-        font-family: Oswald;
-        font-weight: bold;
+        font-size: 20px;
+        font-family: 'lato';
+        font-weight: 400;
         text-align: center;
         padding: 10px 20px;
         border: 1px solid white;
@@ -156,7 +156,7 @@
         color: white;
         border: none;
         border-radius: 6px;
-        font-family: Oswald;
+        font-family: 'lato';
         font-size: 20px;
         transition: background-color 0.3s ease;
         cursor: pointer;
@@ -235,6 +235,13 @@
         opacity: 0;
       }
     }
+    
+    @font-face {
+        font-family: 'lato';
+        src: url('fonts/Lato-Regular.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
 </style>
 
 
@@ -244,7 +251,7 @@
 
 <div id="gameQuestionArea">
     <div id="gameTitle" class="game-title"></div>
-    <div id="" class="game-question-container">
+    <div id="gameQuestionContainer" class="game-question-container">
         <div id="gameQuestion" class="game-question"></div>
         <div id="gameImageContainer" class="game-img-container">
             <img id="gameImage" class="game-img">
